@@ -1,0 +1,70 @@
+html, body{
+    height: 100vh;
+    margin: 0;
+}
+body{
+    display: flex;
+    flex-direction: column;
+}
+.bar{
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: grey;
+    padding: 10px;
+}
+.about{
+    cursor: pointer;
+    margin-right: 20px;
+    margin-left: auto;
+}
+.edit{
+    cursor: pointer;
+}
+.title1{
+    margin-left: 25px;
+}
+.esri-view-user-storage{
+    order: -1;
+}
+#panel{
+    position: relative;
+    z-index: 1;
+    order: -1;
+}
+#viewDiv{
+    display: flex;
+    flex: 2 1 auto;
+    position: relative;
+    z-index: 1;
+}
+#wrapper{
+    /* flex: 1 1 auto;
+    display: flex;
+    flex-direction: column; */
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 auto;
+}
+.display{
+    display: none;
+}
+/* .projectInfo{
+    font-weight: normal;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.editHelp{
+    font-size: 12px;
+    padding-left: 1.5em;
+}
+#addProject{
+    background-color: blanchedalmond;
+    width: 300px;
+    height: 150px;
+}
+#addProjectButton{
+    margin-left: 100px;
+    border-radius: 3px;
+} */

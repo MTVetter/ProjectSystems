@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Project Request Form</title>
+
+		<!--put your external stylesheet links here-->
+		<link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
+		<link rel="stylesheet" href="css/style.css">
+		<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+		<!--[if IE<9]>
+			<link rel="stylesheet" href="css/style.ie.css">
+		<![endif]-->
+	</head>
+
+	<body>
+		<!--put your initial page content here-->
+			
+		<!--you can also use this space for internal scripts or stylesheets;
+		place these within <script> or <style> tags-->
+		<div id="wrapper">
+			<header class="bar">
+				<!-- <div class="logo"><img src="img/dotd.png"></div> -->
+				<div class="title1"><h2>LA DOTD Projects</h2></div>
+				<div class="about"><img class="fa fa-info-circle fa-lg"></div>
+				<div id="dialog" title="About the Application"></div>
+				<div class="edit"><img class="fa fa-pen-square fa-lg"></div>
+			</header>
+			<div id="viewDiv">
+				<div id="line-button" class="esri-widget esri-widget--button esri-interactive" title="Draw polyline">
+					<span class="esri-icon-polyline"></span>
+				</div>
+				<div id="panel">
+					<h1 class="title">
+						Project Request Form
+					</h1>
+					<p class="subtitle">
+						Application allows users to enter log miles of a control or draw the 
+						<br>project on the map and then verify if the information is correct.
+					</p>
+					<br><br>
+					<table class="projectTable">
+						<tbody>
+							<tr>
+								<th id="left">DOTD District:</th>
+								<td id="district"></td>
+							</tr>
+							<tr>
+								<th id="left">Parish:</th>
+								<td id="parish"></td>
+							</tr>
+							<tr>
+								<th id="left">Control Section:</th>
+								<td id="controlsection"></td>
+							</tr>
+							<tr>
+								<th id="left">Begin Logmile:</th>
+								<td id="beginLogmile"></td>
+							</tr>
+							<tr>
+								<th id="left">End Logmile:</th>
+								<td id="endLogmile"></td>
+							</tr>
+							<tr>
+								<th id="left">Urban Length:</th>
+								<td id="urbanLength"></td>
+							</tr>
+							<tr>
+								<th id="left">Rural/Urban:</th>
+								<td id="ruralUrban"></td>
+							</tr>
+							<tr>
+								<th id="left">Federal Aid System:</th>
+								<td id="fedAid"></td>
+							</tr>
+							<tr>
+								<th id="left">Functional Class:</th>
+								<td id="functClass"></td>
+							</tr>
+							<tr>
+								<th id="left">Urbanized Area:</th>
+								<td id="urbanized">
+									<select name="cities" id="cities">
+										<option value="00000">--Select an Urbanized Area--</option>
+										<option value="01279">Alexandria</option>
+										<option value="05680">Baton Rouge</option>
+										<option value="36514">Hammond</option>
+										<option value="40375">Houma</option>
+										<option value="46045">Lafayette</option>
+										<option value="46531">Lake Charles</option>
+										<option value="53794">Mandeville-Covington</option>
+										<option value="58330">Monroe</option>
+										<option value="62677">New Orleans</option>
+										<option value="81739">Shreveport</option>
+										<option value="82468">Slidell</option>
+										<option value="00001">Small Urban Area</option>
+										<option value="00002">Statewide Program</option>
+										<option value="00003">Rural</option>
+									</select>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<div style="text-align: center;">
+						<button class="button" type="button">Submit</button>
+						<button class="closebutton" type="button">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!--put your external script links here-->
+		<script type="text/javascript" src="lib/jquery-3.3.1.js"></script>
+		<script src="https://js.arcgis.com/4.8/"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+	</body>
+</html>
