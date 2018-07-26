@@ -17,14 +17,18 @@ $(document).ready(function (){
         "esri/geometry/Polyline",
         "esri/geometry/geometryEngine",
         "esri/request",
+        "dojo/on",
+        "dojo/dom",
         "dojo/domReady!"
     ], function(Map, MapView, FeatureLayer, LayerList, Expand, Extent, Home, SimpleLineSymbol, SimpleFillSymbol, 
-        Search, Draw, Graphic, Polyline, geometryEngine, esriRequest){
+        Search, Draw, Graphic, Polyline, geometryEngine, esriRequest, on, dom){
 
         //========================================
         //Create a list of global variables
         var graphic;
         var attributes;
+        var addFeature;
+        var newProject;
     
         //========================================
         //Create the map and add layers
@@ -116,8 +120,11 @@ $(document).ready(function (){
 
         //Add the editable projects layer
         var projects = new FeatureLayer({
-            url: "https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer",
-            outFields: ["*"]
+            url: "https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer/0",
+            outFields: ["*"],
+            capabilites: {
+                "supportsAdd": true
+            }
         });
     
         map.add(parish);
@@ -263,7 +270,7 @@ $(document).ready(function (){
             // //Listen to cursor-update event on the polyline draw action
             action.on("cursor-update", createGraphic);
             //Listen to draw-complete event on the polyline draw
-            action.on("draw-complete", addFeature);
+            action.on("draw-complete", addAttributes);
         }
 
         function updateVertices(event){
@@ -295,27 +302,58 @@ $(document).ready(function (){
 
         }
 
-        function addFeature(event){
+        //Add attributes to the graphic
+        function addAttributes(event){
             var result = createGraphic(event)
-            var addFeature = graphic;
+            addFeature = graphic;
             attributes = [];
             getAttributes(addFeature, attributes);
-            console.log(attributes);
+            newProject = new Graphic({
+                geometry: new Polyline({
+                    path: addFeature.geometry.paths,
+                    spatialReference: view.spatialReference
+                }),
+                attributes: attributes
+            });
+            console.log(newProject);
 
-            // projects.applyEdits({
-            //     addFeatures: [addFeature]
-            // });
         }
+
+        //Function to add the feature to the project layer
+        // function addFeature(feature){
+        //     routes.applyEdits({
+        //         addFeatures: [feature]
+        //     });
+        // }
+
+        //Click submit to add the new projects to the feature
+        // on(dom.byId("submitbtn"), "click", function(){
+        //     routes.applyEdits({
+        //         addFeatures: [newProject]
+        //     });
+        // });
+
+        //Add features to the project feature layer
+        on(dom.byId("submitbtn"), "click", function(){
+            projects.applyEdits({
+                addFeatures: [newProject],
+                updateFeatures: null,
+                deleteFeatures: null
+            });
+        });
 
         //=======================================
         //Set up the REST calls to get the attributes
         function getAttributes(path, attributes){
-            if (path.geometry.paths[0].length == 2){
-                var x = path.geometry.paths[0][0][0];
-                var y = path.geometry.paths[0][0][1];
-                var x2 = path.geometry.paths[0][1][0];
-                var y2 = path.geometry.paths[0][1][1];
-            }
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
             
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
@@ -359,21 +397,31 @@ $(document).ready(function (){
                 responseType: "json"
             }).then(function(response){
                 var cityJSON = response.data;
-                console.log(cityJSON);
-                console.log(cityJSON.features);
-                if (cityJSON.features[0].type() === "undefined"){
+                var cityLocations = cityJSON.features[0].attributes;
+                if (cityJSON.features.length == 0){
+                    console.log("It finally worked!");
                     attribute["UrbanizedArea"] = "00003";
                     $("#cities").find("option[value='00003']").attr("selected",true);
                 } else {
-                    var cityLocations = cityJSON.features[0].attributes;
                     var cityCode = cityLocations.Metro_Area_Code;
                     attributes["UrbanizedArea"] = cityCode;
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
                 }
             });
+
+            esriRequest("https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer/0/query?where=OBJECTID+IS+NOT+NULL&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&returnHiddenFields=false&returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var obID = response.data;
+                var id = obID.features[0].attributes.OBJECTID;
+                attributes["OBJECTID"] = id + 1;
+            });
         }
 
     });
+
+    //========================================================================
+    //jQuery functions when clicking buttons
 
     //Close the panel after user is done looking at the information
     $(".closebutton").on("click", function(e){
@@ -386,8 +434,30 @@ $(document).ready(function (){
     });
 
     //Create a dialog box when click the info button
+    //Create a jQuery UI dialog box
+    var dialog = $("#dialog").dialog({
+        autoOpen: false,
+        height: 350,
+        width: 250,
+        modal: true,
+        position:{
+            my: "center center",
+            at: "center center",
+            of: "#wrapper"
+        },
+        buttons:{
+            "Close": function(){
+                dialog.dialog("close");
+            }
+        },
+        close: function (){
+            console.log("Dialog has successfully closed");
+        }
+    });
+    //Click the about button to open the dialog
     $(".about").on("click", function(e){
-        $("#dialog").dialog();
+        dialog.dialog("open");
     });
 
+    
 })

@@ -8,6 +8,7 @@
 		<!--put your external stylesheet links here-->
 		<link rel="stylesheet" href="https://js.arcgis.com/4.8/esri/css/main.css">
 		<link rel="stylesheet" href="css/style.css">
+		<link rel="stylesheet" href="css/jquery-ui.css">
 		<script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
 		<!--[if IE<9]>
 			<link rel="stylesheet" href="css/style.ie.css">
@@ -24,10 +25,13 @@
 				<!-- <div class="logo"><img src="img/dotd.png"></div> -->
 				<div class="title1"><h2>LA DOTD Projects</h2></div>
 				<div class="about"><img class="fa fa-info-circle fa-lg"></div>
-				<div id="dialog" title="About the Application"></div>
+				<!-- <div id="dialog" title="About the Application"></div> -->
 				<div class="edit"><img class="fa fa-pen-square fa-lg"></div>
 			</header>
 			<div id="viewDiv">
+				<div id="dialog" title="About the Application">
+					<p>This is some info about the application.</p>
+				</div>
 				<div id="line-button" class="esri-widget esri-widget--button esri-interactive" title="Draw polyline">
 					<span class="esri-icon-polyline"></span>
 				</div>
@@ -103,7 +107,7 @@
 						</tbody>
 					</table>
 					<div style="text-align: center;">
-						<button class="button" type="button">Submit</button>
+						<button id="submitbtn" type="button">Submit</button>
 						<button class="closebutton" type="button">Close</button>
 					</div>
 				</div>
@@ -111,6 +115,7 @@
 		</div>
 		<!--put your external script links here-->
 		<script type="text/javascript" src="lib/jquery-3.3.1.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.js"></script>
 		<script src="https://js.arcgis.com/4.8/"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	</body>
