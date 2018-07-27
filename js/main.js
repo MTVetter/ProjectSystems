@@ -50,7 +50,7 @@ $(document).ready(function (){
             container: "viewDiv",
             map: map,
             extent: homeExtent,
-            zoom: 6
+            zoom: 7
         });
     
         //Creating the popup templates
@@ -100,6 +100,35 @@ $(document).ready(function (){
                 }]
             }]
         };
+
+        var projectTemplate = {
+            title: "Proposed Project",
+            content:[{
+                type: "fields",
+                fieldInfos: [{
+                    fieldName: "ControlSection",
+                    visible: true
+                },{
+                    fieldName: "LRSID",
+                    visible: true
+                },{
+                    fieldName: "BeginLogmile",
+                    visible: true
+                },{
+                    fieldName: "EndLogmile",
+                    visible: true
+                },{
+                    fieldName: "Parish",
+                    visible: true
+                },{
+                    fieldName: "DOTDDistrict",
+                    visible: true
+                },{
+                    fieldName: "UrbanizedArea",
+                    visible: true
+                }]
+            }]
+        };
     
         //Adding in the parish boundaries
         var parish = new FeatureLayer({
@@ -122,6 +151,7 @@ $(document).ready(function (){
         var projects = new FeatureLayer({
             url: "https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer/0",
             outFields: ["*"],
+            popupTemplate: projectTemplate,
             capabilites: {
                 "supportsAdd": true
             }
@@ -253,6 +283,13 @@ $(document).ready(function (){
             }
         });
 
+        //Function to add the feature to the project layer
+        function addFeature(feature){
+            routes.applyEdits({
+                addFeatures: [feature]
+            });
+        }
+
         //=============================
         //Function to enable drawing graphics
         function enableCreateLine(draw, view){
@@ -307,40 +344,40 @@ $(document).ready(function (){
             var result = createGraphic(event)
             addFeature = graphic;
             attributes = [];
-            getAttributes(addFeature, attributes);
             newProject = new Graphic({
                 geometry: new Polyline({
-                    path: addFeature.geometry.paths,
+                    paths: addFeature.geometry.paths[0],
                     spatialReference: view.spatialReference
-                }),
-                attributes: attributes
+                })
             });
+            getAttributes(addFeature, attributes);
+            newProject.attributes = attributes;
             console.log(newProject);
-
         }
 
-        //Function to add the feature to the project layer
-        // function addFeature(feature){
-        //     routes.applyEdits({
-        //         addFeatures: [feature]
-        //     });
-        // }
-
         //Click submit to add the new projects to the feature
-        // on(dom.byId("submitbtn"), "click", function(){
-        //     routes.applyEdits({
-        //         addFeatures: [newProject]
-        //     });
-        // });
+        // on(dom.byId("submitbtn"), "click", addFeature(newProject));
+        console.log(newProject);
+        var url = "https://services.arcgis.com/PLiuXYMBpMK5h36e/ArcGIS/rest/services/ProjectSystems/FeatureServer/0/applyEdits";
+        var data = {
+            f: "json",
+            adds: JSON.stringify(newProject)
+        };
 
-        //Add features to the project feature layer
-        on(dom.byId("submitbtn"), "click", function(){
-            projects.applyEdits({
-                addFeatures: [newProject],
-                updateFeatures: null,
-                deleteFeatures: null
-            });
+        $("#submitbtn").on("click", function(e){
+            $.post({
+                url: url,
+                data: data,
+                dataType: "json",
+                success: (success) =>{
+                    console.log(success);
+                },
+                error: (error) =>{
+                    console.log(error);
+                }
+            })
         });
+
 
         //=======================================
         //Set up the REST calls to get the attributes
@@ -363,10 +400,13 @@ $(document).ready(function (){
                 var locations = json.locations[0].results[0];
                 var road = locations.routeId;
                 var measure = locations.measure;
-                attributes["ControlSection"] = road;
+                var split = road.split("-");
+                attributes["LRSID"] = road;
                 attributes["BeginLogmile"] = measure;
-                $("#controlsection").text(road);
+                attributes["ControlSection"] = split[0] + "-" + split[1];
+                $("#lrsid").text(road);
                 $("#beginLogmile").text(measure);
+                $("#controlsection").text(split[0] + "-" + split[1]);
             });
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
@@ -408,14 +448,7 @@ $(document).ready(function (){
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
                 }
             });
-
-            esriRequest("https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer/0/query?where=OBJECTID+IS+NOT+NULL&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&resultType=none&distance=0.0&units=esriSRUnit_Meter&returnGeodetic=false&outFields=*&returnHiddenFields=false&returnGeometry=true&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnDistinctValues=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pjson",{
-                responseType: "json"
-            }).then(function(response){
-                var obID = response.data;
-                var id = obID.features[0].attributes.OBJECTID;
-                attributes["OBJECTID"] = id + 1;
-            });
+            return attributes;
         }
 
     });
