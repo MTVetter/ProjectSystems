@@ -35,6 +35,35 @@
 				<div id="line-button" class="esri-widget esri-widget--button esri-interactive" title="Draw polyline">
 					<span class="esri-icon-polyline"></span>
 				</div>
+				<div id="info-div">
+					<h4 class="list-heading">Filter Projects</h4>
+					<legend>Show:</legend>
+					<div id="projectCheck">
+						<input type="checkbox" id="lastFiveFiscal" name="features" class="chk" value="Last 5 Fiscal Years"/>
+						<label for="lastFiveFiscal">Last Five (5) Fiscal Years</label>
+
+						<input type="checkbox" id="lastFiscalYear" name="features" class="chk" value="Last Fiscal Year"/>
+						<label for="lastFiscalYear">Last Fiscal Year</label>
+
+						<input type="checkbox" id="upcomingFiscalYear" name="featues" class="chk" value="Upcoming Fiscal Year"/>
+						<label for="upcomingFiscalYear">Upcoming Fiscal Year</label>
+					</div>
+					<legend>In DOTD District:</legend>
+					<select id="filter">
+						<option value="" selected>All DOTD Districts</option>
+						<option value="02">District 02</option>
+						<option value="03">District 03</option>
+						<option value="04">District 04</option>
+						<option value="05">District 05</option>
+						<option value="07">District 07</option>
+						<option value="08">District 08</option>
+						<option value="58">District 58</option>
+						<option value="61">District 61</option>
+						<option value="62">District 62</option>
+					</select>
+					<input type="button" class="edit-button" value="Filter" id="filterBtn">
+					<input type="button" class="edit-button" value="Clear Filter" id="clearFilterBtn">
+				</div>
 				<div id="panel">
 					<h1 class="title">
 						Project Request Form
@@ -54,7 +83,7 @@
 								<th id="left">Parish:</th>
 								<td id="parish"></td>
 							</tr>
-							<tr>
+							<tr id="ControlSection">
 								<th id="left">Control Section:</th>
 								<td id="controlsection"></td>
 							</tr>

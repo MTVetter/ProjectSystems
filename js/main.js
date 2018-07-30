@@ -29,6 +29,7 @@ $(document).ready(function (){
         var attributes;
         var addFeature;
         var newProject;
+        var controlSectionValue;
     
         //========================================
         //Create the map and add layers
@@ -352,12 +353,11 @@ $(document).ready(function (){
             });
             getAttributes(addFeature, attributes);
             newProject.attributes = attributes;
-            console.log(newProject);
+            console.log(newProject.attributes);
         }
 
         //Click submit to add the new projects to the feature
         // on(dom.byId("submitbtn"), "click", addFeature(newProject));
-        console.log(newProject);
         var url = "https://services.arcgis.com/PLiuXYMBpMK5h36e/ArcGIS/rest/services/ProjectSystems/FeatureServer/0/applyEdits";
         var data = {
             f: "json",
@@ -391,6 +391,7 @@ $(document).ready(function (){
             //Get the coordinates of the last click
             var x2 = path.geometry.paths[0][num][0];
             var y2 = path.geometry.paths[0][num][1];
+
             
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
@@ -407,6 +408,7 @@ $(document).ready(function (){
                 $("#lrsid").text(road);
                 $("#beginLogmile").text(measure);
                 $("#controlsection").text(split[0] + "-" + split[1]);
+                controlSectionValue = JSON.stringify(response, null, 2);
             });
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
