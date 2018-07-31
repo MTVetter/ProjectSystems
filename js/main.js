@@ -157,10 +157,34 @@ $(document).ready(function (){
                 "supportsAdd": true
             }
         });
+
+        //Add the last 5 fiscal year projects
+        var lastFiveProjects = new FeatureLayer({
+            url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/4",
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            title: "Last Five Fiscal Year Projects"
+        });
+
+        //Add last fiscal year's projects
+        var lastYearProjects = new FeatureLayer({
+            url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/5",
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            title: "Last Fiscal Year Projects"
+        });
+
+        //Add next fiscal year's projects
+        var nextYearProjects = new FeatureLayer({
+            url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/6",
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            title: "Next Fiscal Year Projects"
+        });
     
         map.add(parish);
         map.add(routes);
         map.add(projects);
+        map.add(lastFiveProjects);
+        map.add(lastYearProjects);
+        map.add(nextYearProjects);
     
         mapSetup();
     
@@ -220,7 +244,19 @@ $(document).ready(function (){
                 group: "top-left"
             });
 
-            view.ui.add([homeButton, layerExpand, searchButton], "top-left");
+            //Query Widget
+            var query = document.getElementById("info-div");
+            queryExpand = new Expand({
+                expandIconClass: "esri-icon-filter",
+                expandTooltip: "Filter Projects",
+                expanded: false,
+                view: view,
+                content: query,
+                mode: "floating",
+                group: "top-left"
+            });
+
+            view.ui.add([homeButton, layerExpand, searchButton, queryExpand], "top-left");
 
             //Create and add the draw line button
             view.ui.add("line-button", "top-left");
@@ -237,6 +273,55 @@ $(document).ready(function (){
                 }
             });
         }
+
+        //==================================
+        //Change when filter is applied
+        $("#filterBtn").click(function(){
+            checkValues = getValues();
+            districtFilterValue = $("#districtFilter").val();
+            parishFilterValue = $("#parishFilter").val();
+            senateFilterValue = $("#senateFilter").val();
+            houseFilterValue = $("#houseFilter").val();
+            if (checkValues === "district"){
+                lastFiveProjects.definitionExpression = "DISTRICT = '" +districtFilterValue+ "'";
+                lastYearProjects.definitionExpression = "DISTRICT = '"+districtFilterValue+ "'";
+                nextYearProjects.definitionExpression = "DISTRICT = '" +districtFilterValue+ "'";
+            } else if (checkValues === "parish"){
+                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+            } else if (checkValues === "senateDistrict"){
+                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+            } else if (checkValues === "houseDistrict"){
+                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+            }
+            queryExpand.iconNumber = 1;
+            queryExpand.collapse();
+        });
+
+        //Remove filter when clear button is clicked
+        $("#clearFilterBtn").click(function(){
+            lastFiveProjects.definitionExpression = "";
+            lastYearProjects.definitionExpression = "";
+            nextYearProjects.definitionExpression = "";
+            queryExpand.collapse();
+            $("#parishFilter").val("");
+            $("#senateFilter").val("");
+            $("#houseFilter").val("");
+        });
+
+        //Determine which filter to apply
+        function getValues(){
+            var checkArray = [];
+            $(".chk").is(":checked"){
+                checkArray.push($(this).val());
+            };
+            return checkArray;
+        };
     
         //==================================
         //Highlight the selected feature
@@ -492,6 +577,49 @@ $(document).ready(function (){
     //Click the about button to open the dialog
     $(".about").on("click", function(e){
         dialog.dialog("open");
+    });
+
+    //Hide the select options
+    $("#districtFilter").hide();
+    $("#senateFilter").hide();
+    $("#parishFilter").hide();
+    $("#houseFilter").hide();
+
+    //Show dropdown list based on checked box
+    $("#district").click(function(){
+        if ($(this).is(":checked")){
+            $("#districtFilter").show();
+            $("#senateFilter").hide();
+            $("#parishFilter").hide();
+            $("#houseFilter").hide();
+        }
+    });
+
+    $("#senateDistrict").click(function(){
+        if ($(this).is(":checked")){
+            $("#districtFilter").hide();
+            $("#senateFilter").show();
+            $("#parishFilter").hide();
+            $("#houseFilter").hide();
+        }
+    });
+
+    $("#parish").click(function(){
+        if ($(this).is(":checked")){
+            $("#districtFilter").hide();
+            $("#senateFilter").hide();
+            $("#parishFilter").show();
+            $("#houseFilter").hide();
+        }
+    });
+
+    $("#houseDistrict").click(function(){
+        if ($(this).is(":checked")){
+            $("#districtFilter").hide();
+            $("#senateFilter").hide();
+            $("#parishFilter").hide();
+            $("#houseFilter").show();
+        }
     });
 
     
