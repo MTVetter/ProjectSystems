@@ -37,21 +37,21 @@
 				</div>
 				<div id="info-div">
 					<h4 class="list-heading">Filter Projects</h4>
-					<legend>Show:</legend>
+					<legend class="show">Show:</legend>
 					<div id="projectCheck">
-						<input type="radio" id="district" name="features" class="chk">
-						<label for="district">DOTD District</label>
+						<input type="radio" id="district" name="features" class="chk" value="district"/>DOTD District
+						<!-- <label for="district">DOTD District</label> -->
 
-						<input type="radio" id="parish" name="features" class="chk">
-						<label for="parish">Parish</label>
+						<input type="radio" id="parish" name="features" class="chk" value="parish"/>Parishes
+						<!-- <label for="parish">Parish</label> -->
 
-						<input type="radio" id="senateDistrict" name="features" class="chk">
-						<label for="senateDistrict">Louisiana Senate Districts</label>
+						<input type="radio" id="senateDistrict" name="features" class="chk" value="senateDistrict"/>Louisiana Senate Districts
+						<!-- <label for="senateDistrict">Louisiana Senate Districts</label> -->
 
-						<input type="radio" id="houseDistrict" name="features" class="chk">
-						<label for="houseDistrict">Louisiana House of Representative Districts</label>
+						<input type="radio" id="houseDistrict" name="features" class="chk" value="houseDistrict"/>Louisiana House of Representatives Districts
+						<!-- <label for="houseDistrict">Louisiana House of Representative Districts</label> -->
 					</div>
-					<legend>In:</legend>
+					<legend class="in">In:</legend>
 					<select id="districtFilter">
 						<option value="" selected>All DOTD Districts</option>
 						<option value="02">District 02</option>
@@ -297,43 +297,43 @@
 						<tbody>
 							<tr>
 								<th id="left">DOTD District:</th>
-								<td id="district"></td>
+								<td id="dotdDistrict"><input type="text" class="dotdDistrict"></td>
 							</tr>
 							<tr>
 								<th id="left">Parish:</th>
-								<td id="parish"></td>
+								<td id="parish"><input type="text"></td>
 							</tr>
 							<tr id="ControlSection">
 								<th id="left">Control Section:</th>
-								<td id="controlsection"></td>
+								<td id="controlsection"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">LRSID:</th>
-								<td id="lrsid"></td>
+								<td id="lrsid"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Begin Logmile:</th>
-								<td id="beginLogmile"></td>
+								<td id="beginLogmile"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">End Logmile:</th>
-								<td id="endLogmile"></td>
+								<td id="endLogmile"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Urban Length:</th>
-								<td id="urbanLength"></td>
+								<td id="urbanLength"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Rural/Urban:</th>
-								<td id="ruralUrban"></td>
+								<td id="ruralUrban"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Federal Aid System:</th>
-								<td id="fedAid"></td>
+								<td id="fedAid"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Functional Class:</th>
-								<td id="functClass"></td>
+								<td id="functClass"><input type="text"></td>
 							</tr>
 							<tr>
 								<th id="left">Urbanized Area:</th>

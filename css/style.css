@@ -64,7 +64,7 @@ body{
     /*position: fixed;
     top: 15px;*/
 }
-#filter{
+#districtFilter, #parishFilter, #senateFilter, #houseFilter{
     font-size: 12px;
     color: #9C9C9C;
     height: 32px;
@@ -74,9 +74,33 @@ body{
     display: inline-block;
     cursor:pointer;
 }
-/* #districtFilter{
-    visibility: hidden;
+#projectCheck input{
+    display: block;
 }
-#senateFilter{
-    visibility: hidden;
-} */
+.in{
+    padding-top: 5px;
+}
+.show{
+    padding-bottom: 3px;
+}
+.edit-button,
+.edit-button:enabled{
+  font-size: 14px;
+  height: 32px;
+  margin-top: 10px;
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid #0079c1;
+  color: #0079c1;
+  cursor:pointer;
+}
+.edit-button:hover,
+.edit-button:focus{
+  background-color: #e4e4e4;
+}
+.edit-button:disabled{
+    border: 2px solid red;
+    color: darkgray;
+    background-color: lightgrey;
+    cursor: not-allowed;
+}

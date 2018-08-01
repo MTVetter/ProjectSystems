@@ -161,21 +161,21 @@ $(document).ready(function (){
         //Add the last 5 fiscal year projects
         var lastFiveProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/4",
-            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
             title: "Last Five Fiscal Year Projects"
         });
 
         //Add last fiscal year's projects
         var lastYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/5",
-            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
             title: "Last Fiscal Year Projects"
         });
 
         //Add next fiscal year's projects
         var nextYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/6",
-            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE"],
+            outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
             title: "Next Fiscal Year Projects"
         });
     
@@ -282,24 +282,27 @@ $(document).ready(function (){
             parishFilterValue = $("#parishFilter").val();
             senateFilterValue = $("#senateFilter").val();
             houseFilterValue = $("#houseFilter").val();
-            if (checkValues === "district"){
-                lastFiveProjects.definitionExpression = "DISTRICT = '" +districtFilterValue+ "'";
-                lastYearProjects.definitionExpression = "DISTRICT = '"+districtFilterValue+ "'";
-                nextYearProjects.definitionExpression = "DISTRICT = '" +districtFilterValue+ "'";
-            } else if (checkValues === "parish"){
-                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-            } else if (checkValues === "senateDistrict"){
-                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-            } else if (checkValues === "houseDistrict"){
-                lastFiveProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                lastYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
-                nextYearProjects.definitionExpression = "PARISH = '" +parishFilterValue+ "'";
+            if (checkValues[0] === "district"){
+                lastFiveProjects.definitionExpression = "DISTRICT LIKE '" +districtFilterValue+ "'";
+                lastYearProjects.definitionExpression = "DISTRICT LIKE '"+districtFilterValue+ "'";
+                nextYearProjects.definitionExpression = "DISTRICT LIKE '" +districtFilterValue+ "'";
+            } else if (checkValues[0] === "parish"){
+                lastFiveProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
+                lastYearProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
+                nextYearProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
+            } else if (checkValues[0] === "senateDistrict"){
+                lastFiveProjects.definitionExpression = "Senate_District LIKE '" +senateFilterValue+ "'";
+                lastYearProjects.definitionExpression = "Senate_District LIKE '" +senateFilterValue+ "'";
+                nextYearProjects.definitionExpression = "Senate_District LIKE '" +senateFilterValue+ "'";
+            } else if (checkValues[0] === "houseDistrict"){
+                lastFiveProjects.definitionExpression = "House_District LIKE '" +houseFilterValue+ "'";
+                lastYearProjects.definitionExpression = "House_District LIKE '" +houseFilterValue+ "'";
+                nextYearProjects.definitionExpression = "House_District LIKE '" +houseFilterValue+ "'";
             }
             queryExpand.iconNumber = 1;
+            lastFiveProjects.visible = true;
+            lastYearProjects.visible = true;
+            nextYearProjects.visible = true;
             queryExpand.collapse();
         });
 
@@ -308,6 +311,7 @@ $(document).ready(function (){
             lastFiveProjects.definitionExpression = "";
             lastYearProjects.definitionExpression = "";
             nextYearProjects.definitionExpression = "";
+            queryExpand.iconNumber = 0;
             queryExpand.collapse();
             $("#parishFilter").val("");
             $("#senateFilter").val("");
@@ -317,9 +321,9 @@ $(document).ready(function (){
         //Determine which filter to apply
         function getValues(){
             var checkArray = [];
-            $(".chk").is(":checked"){
+            $(".chk:checked").each(function (){
                 checkArray.push($(this).val());
-            };
+            });
             return checkArray;
         };
     
@@ -429,16 +433,20 @@ $(document).ready(function (){
         function addAttributes(event){
             var result = createGraphic(event)
             addFeature = graphic;
+            console.log(addFeature.geometry.paths[0]);
             attributes = [];
+            getAttributes(addFeature, attributes);
             newProject = new Graphic({
                 geometry: new Polyline({
                     paths: addFeature.geometry.paths[0],
                     spatialReference: view.spatialReference
-                })
+                }),
+                attributes: attributes
             });
-            getAttributes(addFeature, attributes);
-            newProject.attributes = attributes;
-            console.log(newProject.attributes);
+            // newProject.attributes = attributes;
+            var parishData = document.getElementsByClassName("dotdDistrict")[0].value;
+            console.log(parishData);
+            console.log(JSON.stringify(newProject));
         }
 
         //Click submit to add the new projects to the feature
@@ -449,10 +457,14 @@ $(document).ready(function (){
             adds: JSON.stringify(newProject)
         };
 
+
         $("#submitbtn").on("click", function(e){
             $.post({
                 url: url,
-                data: data,
+                data: {
+                    f: "json",
+                    adds: JSON.stringify(newProject)
+                },
                 dataType: "json",
                 success: (success) =>{
                     console.log(success);
@@ -490,10 +502,9 @@ $(document).ready(function (){
                 attributes["LRSID"] = road;
                 attributes["BeginLogmile"] = measure;
                 attributes["ControlSection"] = split[0] + "-" + split[1];
-                $("#lrsid").text(road);
-                $("#beginLogmile").text(measure);
-                $("#controlsection").text(split[0] + "-" + split[1]);
-                controlSectionValue = JSON.stringify(response, null, 2);
+                $("#lrsid input:text").val(road);
+                $("#beginLogmile input:text").val(measure);
+                $("#controlsection input:text").val(split[0] + "-" + split[1]);
             });
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
@@ -504,7 +515,7 @@ $(document).ready(function (){
                 var road = locations.routeId;
                 var measure = locations.measure;
                 attributes["EndLogmile"] = measure;
-                $("#endLogmile").text(measure);
+                $("#endLogmile input:text").val(measure);
             });
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Boundaries/LA_Parishes/FeatureServer/0/query?where=&objectIds=&time=&geometry="+x+","+ y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
@@ -512,12 +523,12 @@ $(document).ready(function (){
             }).then(function(response){
                 var parishJSON = response.data;
                 var parishLocations = parishJSON.features[0].attributes;
-                var parishName = parishLocations.Name;
+                var parishName = parishLocations.Parish_Num;
                 var district = parishLocations.DOTD_Distr;
                 attributes["Parish"] = parishName;
                 attributes["DOTDDistrict"] = district;
-                $("#parish").text(parishName);
-                $("#district").text(district);
+                $("#parish input:text").val(parishName);
+                $("#dotdDistrict input:text").val(district);
             });
 
             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/LABoundaries/FeatureServer/3/query?where=&objectIds=&time=&geometry=" +x+","+y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
@@ -527,14 +538,17 @@ $(document).ready(function (){
                 var cityLocations = cityJSON.features[0].attributes;
                 if (cityJSON.features.length == 0){
                     console.log("It finally worked!");
-                    attribute["UrbanizedArea"] = "00003";
+                    attributes["UrbanizedArea"] = "00003";
                     $("#cities").find("option[value='00003']").attr("selected",true);
                 } else {
                     var cityCode = cityLocations.Metro_Area_Code;
                     attributes["UrbanizedArea"] = cityCode;
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
+                    attributes["UrbanRural"] = "U";
+                    $("#ruralUrban input:text").val("U");
                 }
             });
+            
             return attributes;
         }
 
