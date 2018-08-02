@@ -373,13 +373,6 @@ $(document).ready(function (){
             }
         });
 
-        //Function to add the feature to the project layer
-        function addFeature(feature){
-            routes.applyEdits({
-                addFeatures: [feature]
-            });
-        }
-
         //=============================
         //Function to enable drawing graphics
         function enableCreateLine(draw, view){
@@ -433,9 +426,24 @@ $(document).ready(function (){
         function addAttributes(event){
             var result = createGraphic(event)
             addFeature = graphic;
-            console.log(addFeature.geometry.paths[0]);
             attributes = [];
-            getAttributes(addFeature, attributes);
+
+            //Check to see if the user entered a parish number
+            var parishData = $(".parishNum").val();
+            if (parishData){
+                attributes["Parish"] = parishData;
+            } else {
+                getParish(addFeature, attributes);
+            }
+
+            //Check to see if the user entered a district
+            var distData = $(".dotdDistrict").val();
+            if (distData){
+                attributes["DOTDDistrict"] = distData;
+            } else {
+                getDistrict(addFeature, attributes);
+            }
+            // getAttributes(addFeature, attributes);
             newProject = new Graphic({
                 geometry: new Polyline({
                     paths: addFeature.geometry.paths[0],
@@ -443,36 +451,33 @@ $(document).ready(function (){
                 }),
                 attributes: attributes
             });
-            // newProject.attributes = attributes;
-            var parishData = document.getElementsByClassName("dotdDistrict")[0].value;
-            console.log(parishData);
             console.log(JSON.stringify(newProject));
         }
 
         //Click submit to add the new projects to the feature
-        // on(dom.byId("submitbtn"), "click", addFeature(newProject));
         var url = "https://services.arcgis.com/PLiuXYMBpMK5h36e/ArcGIS/rest/services/ProjectSystems/FeatureServer/0/applyEdits";
-        var data = {
-            f: "json",
-            adds: JSON.stringify(newProject)
-        };
-
 
         $("#submitbtn").on("click", function(e){
-            $.post({
-                url: url,
-                data: {
-                    f: "json",
-                    adds: JSON.stringify(newProject)
-                },
-                dataType: "json",
-                success: (success) =>{
-                    console.log(success);
-                },
-                error: (error) =>{
-                    console.log(error);
-                }
-            })
+            $(".parishNum").on("change", function(e){
+                var newParishNum = $(".parishNum").val();
+                newProject.setAttribute("Parish", newParishNum);
+            });
+            // $.post({
+            //     url: url,
+            //     data: {
+            //         f: "json",
+            //         adds: JSON.stringify(newProject)
+            //     },
+            //     dataType: "json",
+            //     success: (success) =>{
+            //         console.log(success);
+            //         alert("Proposed Project has successfully posted to the database!");
+            //     },
+            //     error: (error) =>{
+            //         console.log(error);
+            //         alert("An error occurred please try again");
+            //     }
+            // })
         });
 
 
@@ -527,7 +532,7 @@ $(document).ready(function (){
                 var district = parishLocations.DOTD_Distr;
                 attributes["Parish"] = parishName;
                 attributes["DOTDDistrict"] = district;
-                $("#parish input:text").val(parishName);
+                $(".parishNum").val(parishName);
                 $("#dotdDistrict input:text").val(district);
             });
 
@@ -536,19 +541,47 @@ $(document).ready(function (){
             }).then(function(response){
                 var cityJSON = response.data;
                 var cityLocations = cityJSON.features[0].attributes;
-                if (cityJSON.features.length == 0){
-                    console.log("It finally worked!");
-                    attributes["UrbanizedArea"] = "00003";
-                    $("#cities").find("option[value='00003']").attr("selected",true);
-                } else {
-                    var cityCode = cityLocations.Metro_Area_Code;
+                var cityCode = cityLocations.Metro_Area_Code;
+                if (cityCode){
                     attributes["UrbanizedArea"] = cityCode;
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
                     attributes["UrbanRural"] = "U";
                     $("#ruralUrban input:text").val("U");
+                    
+                } else {
+                    console.log("It finally worked!");
+                    attributes["UrbanizedArea"] = "00003";
+                    $("#cities").find("option[value='00003']").attr("selected",true);
+                    attributes["UrbanRural"] = "R";
+                    $("#ruralUrban input:text").val("R");
                 }
             });
             
+            return attributes;
+        }
+
+        //Set up the REST call to get the parish values
+        function getParish(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Boundaries/LA_Parishes/FeatureServer/0/query?where=&objectIds=&time=&geometry="+x+","+ y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var parishJSON = response.data;
+                var parishLocations = parishJSON.features[0].attributes;
+                var parishName = parishLocations.Parish_Num;
+                var district = parishLocations.DOTD_Distr;
+                attributes["Parish"] = parishName;
+                $(".parishNum").val(parishName);
+            });
             return attributes;
         }
 
