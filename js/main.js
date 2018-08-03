@@ -443,6 +443,55 @@ $(document).ready(function (){
             } else {
                 getDistrict(addFeature, attributes);
             }
+
+            //Check to see if user entered a control section
+            var controlData = $(".cs").val();
+            if (controlData){
+                attributes["ControlSection"] = controlData;
+            } else {
+                getControl(addFeature, attributes);
+            }
+
+            //Check to see if user entered a LRSID
+            var lrsData = $(".lrsID").val();
+            if (lrsData){
+                attributes["LRSID"] = lrsData;
+                getLogmiles(addFeature, attributes, lrsData);
+            } else {
+                getLRS(addFeature, attributes);
+            }
+
+            //Check to see if user entered a rural/urban code
+            var ruralData = $(".rurUrb").val();
+            if (ruralData){
+                attributes["UrbanRural"] = ruralData;
+            } else {
+                getRural(addFeature, attributes);
+            }
+
+            //Check to see if user entered a fed aid value
+            // var aidData = $(".fedAids").val();
+            // if (aidData){
+            //     attributes["FedAid"] = aidData;
+            // } else {
+            //     getAid(addFeature, attributes);
+            // }
+
+            // //Check to see if user entered a functional class
+            // var functData = $(".functClass").val();
+            // if (functData){
+            //     attributes["FunctionalSystem"] = functData;
+            // } else {
+            //     getFunctional(addFeature, attributes);
+            // }
+
+            //Check to see if user entered an urbanized area
+            var urbanizedData = $("#cities").val();
+            if (urbanizedData){
+                attributes["UrbanizedArea"] = urbanizedData;
+            } else {
+                getUrbanized(addFeature, attributes);
+            }
             // getAttributes(addFeature, attributes);
             newProject = new Graphic({
                 geometry: new Polyline({
@@ -458,26 +507,25 @@ $(document).ready(function (){
         var url = "https://services.arcgis.com/PLiuXYMBpMK5h36e/ArcGIS/rest/services/ProjectSystems/FeatureServer/0/applyEdits";
 
         $("#submitbtn").on("click", function(e){
-            $(".parishNum").on("change", function(e){
-                var newParishNum = $(".parishNum").val();
-                newProject.setAttribute("Parish", newParishNum);
-            });
-            // $.post({
-            //     url: url,
-            //     data: {
-            //         f: "json",
-            //         adds: JSON.stringify(newProject)
-            //     },
-            //     dataType: "json",
-            //     success: (success) =>{
-            //         console.log(success);
-            //         alert("Proposed Project has successfully posted to the database!");
-            //     },
-            //     error: (error) =>{
-            //         console.log(error);
-            //         alert("An error occurred please try again");
-            //     }
-            // })
+            //Check to see if the user made any changes to the values
+            checkChanges(newProject);
+
+            $.post({
+                url: url,
+                data: {
+                    f: "json",
+                    adds: JSON.stringify(newProject)
+                },
+                dataType: "json",
+                success: (success) =>{
+                    console.log(success);
+                    alert("Proposed Project has successfully posted to the database!");
+                },
+                error: (error) =>{
+                    console.log(error);
+                    alert("An error occurred please try again");
+                }
+            })
         });
 
 
@@ -583,6 +631,288 @@ $(document).ready(function (){
                 $(".parishNum").val(parishName);
             });
             return attributes;
+        }
+
+        //Get the district number of the project
+        function getDistrict(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Boundaries/LA_Parishes/FeatureServer/0/query?where=&objectIds=&time=&geometry="+x+","+ y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var parishJSON = response.data;
+                var parishLocations = parishJSON.features[0].attributes;
+                var district = parishLocations.DOTD_Distr;
+                attributes["DOTDDistrict"] = district;
+                $("#dotdDistrict input:text").val(district);
+            });
+            return attributes;
+        }
+
+        //Get the control section of the project
+        function getControl(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the control section of the project
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                responseType: "json"
+            }).then(function(response){
+                var json = response.data;
+                var locations = json.locations[0].results[0];
+                var road = locations.routeId;
+                var split = road.split("-");
+                attributes["ControlSection"] = split[0] + "-" + split[1];
+                $("#controlsection input:text").val(split[0] + "-" + split[1]);
+            });
+            return attributes;
+        }
+
+        //Get the district number of the project
+        function getLRS(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                responseType: "json"
+            }).then(function(response){
+                var json = response.data;
+                var locations = json.locations[0].results[0];
+                var road = locations.routeId;
+                attributes["LRSID"] = road;
+                $("#lrsid input:text").val(road);
+
+                esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                    responseType: "json"
+                }).then(function(response){
+                    var json = response.data;
+                    var locations = json.locations[0].results[0];
+                    var measure = locations.measure;
+                    attributes["BeginLogmile"] = measure;
+                    $("#beginLogmile input:text").val(measure);
+                });
+
+                esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                    responseType: "json"
+                }).then(function(response){
+                    var json = response.data;
+                    var locations = json.locations[0].results[0];
+                    var measure = locations.measure;
+                    attributes["EndLogmile"] = measure;
+                    $("#endLogmile input:text").val(measure);
+                });
+            });
+            return attributes;
+        }
+
+        //Get the beginning and ending logmile
+        function getLogmiles(path, attributes, data){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                responseType: "json"
+            }).then(function(response){
+                var json = response.data;
+                var locations = json.locations[0].results[0];
+                var measure = locations.measure;
+                attributes["BeginLogmile"] = measure;
+                $("#beginLogmile input:text").val(measure);
+            });
+
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                responseType: "json"
+            }).then(function(response){
+                var json = response.data;
+                var locations = json.locations[0].results[0];
+                var measure = locations.measure;
+                attributes["EndLogmile"] = measure;
+                $("#endLogmile input:text").val(measure);
+            });
+            return attributes;
+        }
+
+        //Get the value of the Rural/Urban field
+        function getRural(path, attributes){
+            //Determine if the user entered rural for urbanized area
+            var rural = $("#cities").val();
+            if (rural == "00003"){
+                $("#ruralUrban input:text").val("R");
+            }
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/LABoundaries/FeatureServer/3/query?where=&objectIds=&time=&geometry=" +x+","+y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var cityJSON = response.data;
+                var cityLocations = cityJSON.features[0].attributes;
+                var cityCode = cityLocations.Metro_Area_Code;
+                if (cityCode){
+                    attributes["UrbanRural"] = "U";
+                    $("#ruralUrban input:text").val("U");
+                    
+                } else {
+                    attributes["UrbanRural"] = "R";
+                    $("#ruralUrban input:text").val("R");
+                }
+            });
+            return attributes;
+        }
+
+        //Get the district number of the project
+        function getAid(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/Roads_and_Highways/FeatureServer/14/query?geometry={%22paths%22:[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatailRel=esriSpatialRelIntersects&outFields=*&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var parishJSON = response.data;
+                var parishLocations = parishJSON.features[0].attributes;
+                var district = parishLocations.DOTD_Distr;
+                attributes["DOTDDistrict"] = district;
+                $("#dotdDistrict input:text").val(district);
+            });
+            return attributes;
+        }
+
+        //Get the district number of the project
+        function getUrbanized(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/LABoundaries/FeatureServer/3/query?where=&objectIds=&time=&geometry=" +x+","+y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var cityJSON = response.data;
+                var cityLocations = cityJSON.features[0].attributes;
+                var cityCode = cityLocations.Metro_Area_Code;
+                if (cityCode){
+                    attributes["UrbanizedArea"] = cityCode;
+                    $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);                    
+                } else {
+                    console.log("It finally worked!");
+                    attributes["UrbanizedArea"] = "00003";
+                    $("#cities").find("option[value='00003']").attr("selected",true);
+                }
+            });
+            return attributes;
+        }
+
+        //Get the district number of the project
+        function getFunctional(path, attributes){
+            //Determine the number of clicks the user did
+            var num = path.geometry.paths[0].length -1;
+
+            //Get the coordinates of the first click
+            var x = path.geometry.paths[0][0][0];
+            var y = path.geometry.paths[0][0][1];
+            //Get the coordinates of the last click
+            var x2 = path.geometry.paths[0][num][0];
+            var y2 = path.geometry.paths[0][num][1];
+
+            //Determine the district the project is located in
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Boundaries/LA_Parishes/FeatureServer/0/query?where=&objectIds=&time=&geometry="+x+","+ y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                responseType: "json"
+            }).then(function(response){
+                var parishJSON = response.data;
+                var parishLocations = parishJSON.features[0].attributes;
+                var district = parishLocations.DOTD_Distr;
+                attributes["DOTDDistrict"] = district;
+                $("#dotdDistrict input:text").val(district);
+            });
+            return attributes;
+        }
+
+        //===================================================================
+        //Function to check the change if any that the user made
+        function checkChanges(project){
+            var districtVal = project.attributes["DOTDDistrict"];
+            var parishVal = project.attributes["Parish"];
+            var controlSectionVal = project.attributes["ControlSection"];
+            var lrsVal = project.attributes["LRSID"];
+            var bLogmileVal = project.attributes["BeginLogmile"];
+            var eLogmileVal = project.attributes["EndLogmile"];
+
+            if (!(parishVal === $(".parishNum").val())){
+                project.attributes["Parish"] = $(".parishNum").val();
+            }
+
+            if (!(districtVal === $(".dotdDistrict").val())){
+                project.attributes["DOTDDistrict"] = $(".dotdDistrict").val();
+            }
+
+            if (!(controlSectionVal === $(".cs").val())){
+                project.attributes["ControlSection"] = $(".cs").val();
+            }
+
+            if (!(lrsVal === $(".lrsID").val())){
+                project.attributes["LRSID"] = $(".lrsID").val();
+            }
+
+            if (!(bLogmileVal === $(".bL").val())){
+                project.attributes["BeginLogmile"] = $(".bL").val();
+            }
+
+            if (!(eLogmileVal === $(".eL").val())){
+                project.attributes["EndLogmile"] = $(".eL").val();
+            }
         }
 
     });
