@@ -463,7 +463,7 @@ $(document).ready(function (){
             }
 
             //Check to see if user entered a rural/urban code
-            var ruralData = $(".rurUrb").val();
+            var ruralData = $("#rural").val();
             if (ruralData){
                 attributes["UrbanRural"] = ruralData;
             } else {
@@ -678,9 +678,11 @@ $(document).ready(function (){
                 var json = response.data;
                 var locations = json.locations[0].results[0];
                 var road = locations.routeId;
-                var split = road.split("-");
-                attributes["ControlSection"] = split[0] + "-" + split[1];
-                $("#controlsection input:text").val(split[0] + "-" + split[1]);
+                if (road.length === 12){
+                    var split = road.split("-");
+                    attributes["ControlSection"] = split[0] + "-" + split[1];
+                    $("#controlsection input:text").val(split[0] + "-" + split[1]);
+                } 
             });
             return attributes;
         }
@@ -706,6 +708,12 @@ $(document).ready(function (){
                 var road = locations.routeId;
                 attributes["LRSID"] = road;
                 $("#lrsid input:text").val(road);
+
+                if (road.length > 12){
+                    $(".local").css("display", "table-cell");
+                    $(".localValue").css("display", "table-cell");
+                    $(".functClass").css("display", "table-cell");
+                }
 
                 esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
                     responseType: "json"
@@ -752,7 +760,7 @@ $(document).ready(function (){
                 $("#beginLogmile input:text").val(measure);
             });
 
-            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
                 responseType: "json"
             }).then(function(response){
                 var json = response.data;
@@ -790,11 +798,11 @@ $(document).ready(function (){
                 var cityCode = cityLocations.Metro_Area_Code;
                 if (cityCode){
                     attributes["UrbanRural"] = "U";
-                    $("#ruralUrban input:text").val("U");
+                    $("#rural").find("option[value='U']").attr("selected", true);
                     
                 } else {
                     attributes["UrbanRural"] = "R";
-                    $("#ruralUrban input:text").val("R");
+                    $("#rural").find("option [value='R']").attr("selected", true);
                 }
             });
             return attributes;
@@ -999,6 +1007,30 @@ $(document).ready(function (){
             $("#houseFilter").show();
         }
     });
+
+    //Check to see if user entered a local LRSID
+    $(".lrsID").on("change", function(){
+        var idValue = $(".lrsID").val();
+        if (idValue.length > 12){
+            $(".local").css("display", "table-cell");
+            $(".localValue").css("display", "table-cell");
+            $(".functClass").css("display", "table-cell");
+        }
+    });
+
+    //Clear the input boxes/select
+    $("#clearbtn").on("click", function(){
+        $(".dotdDistrict").val("");
+        $(".parishNum").val("");
+        $(".cs").val("");
+        $(".lrsID").val("");
+        $(".bL").val("");
+        $(".eL").val("");
+        $("#fedAids").val("");
+        $("#functClass").val("");
+        $("#cities").val("");
+        $("#rural").val("");
+    })
 
     
 })

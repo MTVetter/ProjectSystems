@@ -104,3 +104,9 @@ body{
     background-color: lightgrey;
     cursor: not-allowed;
 }
+.local{
+    display: none;
+}
+.localValue{
+    display: none;
+}

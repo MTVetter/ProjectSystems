@@ -309,7 +309,7 @@
 							</tr>
 							<tr>
 								<th id="left">LRSID:</th>
-								<td id="lrsid"><input type="text" class="lrsID"></td>
+								<td id="lrsid"><input type="text" class="lrsID" maxlength="18"></td>
 							</tr>
 							<tr>
 								<th id="left">Begin Logmile:</th>
@@ -324,16 +324,41 @@
 								<td id="urbanLength"><input type="text"></td>
 							</tr>
 							<tr>
-								<th id="left">Rural/Urban:</th>
-								<td id="ruralUrban"><input type="text" class="rurUrb"></td>
+								<th id="left" class="local">Rural/Urban:</th>
+								<td id="ruralUrban" class="localValue">
+									<select name="rural" id="rural">
+										<option value="">--Select Rural or Urban--</option>
+										<option value="R">Rural</option>
+										<option value="U">Urban</option>
+									</select>
+								</td>
 							</tr>
 							<tr>
-								<th id="left">Federal Aid System:</th>
-								<td id="fedAid"><input type="text" class="fedAids"></td>
+								<th id="left" class="local">Federal Aid System:</th>
+								<td id="fedAid" class="localValue">
+									<select name="fedAids" id="fedAids">
+										<option value="">--Select a Federal Aid System--</option>
+										<option value="I">Interstate</option>
+										<option value="N">NHS Non-Interstate</option>
+										<option value="Z">Not on any Federal Aid System</option>
+										<option value="O">Other Federal Aid Highway/STP</option>
+									</select>
+								</td>
 							</tr>
 							<tr>
-								<th id="left">Functional Class:</th>
-								<td id="functClass"><input type="text" class="functClass"></td>
+								<th id="left" class="local">Functional Class:</th>
+								<td id="functClass" class="localValue">
+									<select name="functClass" id="functClass">
+										<option value="">--Select a Functional Class--</option>
+										<option value="F">Freeways & Expressways</option>
+										<option value="L">Local</option>
+										<option value="C">Major Collector</option>
+										<option value="M">Minor Arterial</option>
+										<option value="R">Minor Collector</option>
+										<option value="N">No Classification</option>
+										<option value="P">Principal Arterial</option>
+									</select>
+								</td>
 							</tr>
 							<tr>
 								<th id="left">Urbanized Area:</th>
@@ -361,6 +386,7 @@
 					</table>
 					<div style="text-align: center;">
 						<button id="submitbtn" type="button">Submit</button>
+						<button id="clearbtn" type="button">Clear Fields</button>
 						<button class="closebutton" type="button">Close</button>
 					</div>
 				</div>
