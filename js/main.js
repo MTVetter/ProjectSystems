@@ -130,6 +130,35 @@ $(document).ready(function (){
                 }]
             }]
         };
+
+        var oldProjectTemplate = {
+            title: "Let Projects",
+            content:[{
+                type: "fields",
+                fieldInfos: [{
+                    fieldName: "PROJECT",
+                    visible: true
+                }, {
+                    fieldName: "DISTRICT",
+                    visible: true
+                }, {
+                    fieldName: "PARISH_NAME",
+                    visible: true
+                }, {
+                    fieldName: "URBANIZED_AREA",
+                    visible: true
+                }, {
+                    fieldName: "ROUTE",
+                    visible: true
+                }, {
+                    fieldName: "House_District",
+                    visible: true
+                }, {
+                    fieldName: "Senate_District",
+                    visible: true
+                }]
+            }]
+        };
     
         //Adding in the parish boundaries
         var parish = new FeatureLayer({
@@ -162,21 +191,24 @@ $(document).ready(function (){
         var lastFiveProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/4",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Last Five Fiscal Year Projects"
+            title: "Last Five Fiscal Year Projects",
+            popupTemplate: oldProjectTemplate
         });
 
         //Add last fiscal year's projects
         var lastYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/5",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Last Fiscal Year Projects"
+            title: "Last Fiscal Year Projects",
+            popupTemplate: oldProjectTemplate
         });
 
         //Add next fiscal year's projects
         var nextYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/6",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Next Fiscal Year Projects"
+            title: "Next Fiscal Year Projects",
+            popupTemplate: oldProjectTemplate
         });
     
         map.add(parish);
@@ -232,6 +264,24 @@ $(document).ready(function (){
                     outFields: ["*"],
                     popupTemplate: parishTemplate,
                     name: "Parish"
+                },{
+                    featureLayer: lastFiveProjects,
+                    displayField: "PROJECT",
+                    searchFields: ["PROJECT"],
+                    name: "Projects Let in July 2012-August 2017",
+                    popupTemplate: oldProjectTemplate
+                },{
+                    featureLayer: lastYearProjects,
+                    displayField: "PROJECT",
+                    searchFields: ["PROJECT"],
+                    name: "Projects Let in September 2017-June 2018",
+                    popupTemplate: oldProjectTemplate
+                }, {
+                    featureLayer: nextYearProjects,
+                    displayField: "PROJECT",
+                    searchFields: ["PROJECT"],
+                    name: "Projects Let in Fiscal Year 2018-2019",
+                    popupTemplate: oldProjectTemplate
                 }]
             });
     
