@@ -268,6 +268,7 @@ $(document).ready(function (){
                 //Draw polyline button
                 var drawLineButton = document.getElementById("line-button");
                 drawLineButton.onclick = function(){
+                    $("#panel").show("slide");
                     view.graphics.removeAll();
                     enableCreateLine(draw, view);
                 }
@@ -927,7 +928,7 @@ $(document).ready(function (){
 
     //Open the panel when the user clicks the button to add a project
     $(".edit").on("click", function(e){
-        $("#panel").show("fast");
+        $("#panel").show("slide");
     });
 
     //Create a dialog box when click the info button
