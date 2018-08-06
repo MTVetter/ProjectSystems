@@ -110,3 +110,24 @@ body{
 .localValue{
     display: none;
 }
+.panelBtn,
+.panelBtn:enabled{
+  font-size: 14px;
+  height: 32px;
+  margin-top: 10px;
+  width: 75%;
+  background-color: transparent;
+  border: 1px solid #0079c1;
+  color: #0079c1;
+  cursor:pointer;
+}
+.panelBtn:hover,
+.panelBtn:focus{
+  background-color: #e4e4e4;
+}
+.panelBtn:disabled{
+    border: 2px solid red;
+    color: darkgray;
+    background-color: lightgrey;
+    cursor: not-allowed;
+}

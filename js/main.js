@@ -930,7 +930,7 @@ $(document).ready(function (){
     //jQuery functions when clicking buttons
 
     //Close the panel after user is done looking at the information
-    $(".closebutton").on("click", function(e){
+    $("#closebutton").on("click", function(e){
         $("#panel").hide("slide");
     });
 
