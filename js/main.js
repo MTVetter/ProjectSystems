@@ -571,6 +571,8 @@ $(document).ready(function (){
                 success: (success) =>{
                     console.log(success);
                     alert("Proposed Project has successfully posted to the database!");
+                    view.graphics.removeAll();
+                    projects.refresh();
                 },
                 error: (error) =>{
                     console.log(error);
