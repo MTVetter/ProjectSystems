@@ -23,6 +23,14 @@ body{
 }
 .title1{
     margin-left: 25px;
+    font-family: "Oswald";
+}
+.title, #left, .ui-dialog-title{
+    font-family: "Oswald";
+}
+#dialog p, .subtitle, .dotdDistrict, .parishNum,
+.cs, .lrsID, .bL, .eL{
+    font-family: "Quattrocento"
 }
 .esri-view-user-storage{
     order: -1;
