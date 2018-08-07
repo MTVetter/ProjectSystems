@@ -1080,6 +1080,8 @@ $(document).ready(function (){
         $("#functClass").val("");
         $("#cities").val("");
         $("#rural").val("");
+        $(".local").css("display", "none");
+        $(".localValue").css("display", "none");
     })
 
     
