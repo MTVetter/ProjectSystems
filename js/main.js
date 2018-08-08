@@ -756,36 +756,72 @@ $(document).ready(function (){
                 responseType: "json"
             }).then(function(response){
                 var json = response.data;
-                var locations = json.locations[0].results[0];
-                var road = locations.routeId;
-                attributes["LRSID"] = road;
-                $("#lrsid input:text").val(road);
+                var firstLocation = json.locations[0].results[0];
+                var secondLocation = json.locations[0].results[1];
+                var string = JSON.stringify(firstLocation, ["routeId"]);
+                console.log(string);
+                var confirmLoc = confirm("Do you want to use " +string+ "?");
+                if (confirmLoc == true){
+                    var road = firstLocation.routeId;
+                    attributes["LRSID"] = road;
+                    $("#lrsid input:text").val(road);
 
-                if (road.length > 12){
-                    $(".local").css("display", "table-cell");
-                    $(".localValue").css("display", "table-cell");
-                    $(".functClass").css("display", "table-cell");
-                }
+                    if (road.length > 12){
+                        $(".local").css("display", "table-cell");
+                        $(".localValue").css("display", "table-cell");
+                        $(".functClass").css("display", "table-cell");
+                    }
 
-                esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
-                    responseType: "json"
-                }).then(function(response){
-                    var json = response.data;
-                    var locations = json.locations[0].results[0];
-                    var measure = locations.measure;
-                    attributes["BeginLogmile"] = measure;
-                    $("#beginLogmile input:text").val(measure);
-                });
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                        responseType: "json"
+                    }).then(function(response){
+                        var json = response.data;
+                        var locations = json.locations[0].results[0];
+                        var measure = locations.measure;
+                        attributes["BeginLogmile"] = measure;
+                        $("#beginLogmile input:text").val(measure);
+                    });
 
-                esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                    responseType: "json"
-                }).then(function(response){
-                    var json = response.data;
-                    var locations = json.locations[0].results[0];
-                    var measure = locations.measure;
-                    attributes["EndLogmile"] = measure;
-                    $("#endLogmile input:text").val(measure);
-                });
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                        responseType: "json"
+                    }).then(function(response){
+                        var json = response.data;
+                        var locations = json.locations[0].results[0];
+                        var measure = locations.measure;
+                        attributes["EndLogmile"] = measure;
+                        $("#endLogmile input:text").val(measure);
+                    });
+                } else {
+                    var road = secondLocation.routeId;
+                    attributes["LRSID"] = road;
+                    $("#lrsid input:text").val(road);
+
+                    if (road.length > 12){
+                        $(".local").css("display", "table-cell");
+                        $(".localValue").css("display", "table-cell");
+                        $(".functClass").css("display", "table-cell");
+                    }
+
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+                        responseType: "json"
+                    }).then(function(response){
+                        var json = response.data;
+                        var locations = json.locations[0].results[0];
+                        var measure = locations.measure;
+                        attributes["BeginLogmile"] = measure;
+                        $("#beginLogmile input:text").val(measure);
+                    });
+
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                        responseType: "json"
+                    }).then(function(response){
+                        var json = response.data;
+                        var locations = json.locations[0].results[0];
+                        var measure = locations.measure;
+                        attributes["EndLogmile"] = measure;
+                        $("#endLogmile input:text").val(measure);
+                    });
+                }   
             });
             return attributes;
         }
@@ -1012,6 +1048,7 @@ $(document).ready(function (){
             console.log("Dialog has successfully closed");
         }
     });
+    
     //Click the about button to open the dialog
     $(".about").on("click", function(e){
         dialog.dialog("open");
