@@ -462,7 +462,7 @@ $(document).ready(function (){
                 }),
                 symbol:{
                     type: "simple-line",
-                    color: [4, 90, 141],
+                    color: [0, 191, 255],
                     width: 4,
                     cap: "round",
                     join: "round"
