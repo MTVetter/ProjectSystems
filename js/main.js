@@ -1008,16 +1008,25 @@ $(document).ready(function (){
                 responseType: "json"
             }).then(function(response){
                 var cityJSON = response.data;
-                var cityLocations = cityJSON.features[0].attributes;
-                var cityCode = cityLocations.Metro_Area_Code;
-                if (cityCode){
-                    attributes["UrbanizedArea"] = cityCode;
-                    $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);                    
-                } else {
-                    console.log("It finally worked!");
+                if (cityJSON.features.length == 0){
                     attributes["UrbanizedArea"] = "00003";
                     $("#cities").find("option[value='00003']").attr("selected",true);
+                } else {
+                    var cityLocations = cityJSON.features[0].attributes;
+                    var cityCode = cityLocations.Metro_Area_Code;
+                    attributes["UrbanizedArea"] = cityCode;
+                    $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
                 }
+                // var cityLocations = cityJSON.features[0].attributes;
+                // var cityCode = cityLocations.Metro_Area_Code;
+                // if (cityCode){
+                //     attributes["UrbanizedArea"] = cityCode;
+                //     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);                    
+                // } else {
+                //     console.log("It finally worked!");
+                //     attributes["UrbanizedArea"] = "00003";
+                //     $("#cities").find("option[value='00003']").attr("selected",true);
+                // }
             });
             return attributes;
         }
