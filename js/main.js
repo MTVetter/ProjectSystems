@@ -1042,6 +1042,23 @@ $(document).ready(function (){
             }
         }
 
+        //Clear the input boxes/select
+        $("#clearbtn").on("click", function(){
+            $(".dotdDistrict").val("");
+            $(".parishNum").val("");
+            $(".cs").val("");
+            $(".lrsID").val("");
+            $(".bL").val("");
+            $(".eL").val("");
+            $("#fedAids").val("");
+            $("#functClass").val("");
+            $("#cities").val("");
+            $("#rural").val("");
+            $(".local").css("display", "none");
+            $(".localValue").css("display", "none");
+            view.graphics.removeAll();
+        });
+
     });
 
     //========================================================================
@@ -1137,21 +1154,7 @@ $(document).ready(function (){
         }
     });
 
-    //Clear the input boxes/select
-    $("#clearbtn").on("click", function(){
-        $(".dotdDistrict").val("");
-        $(".parishNum").val("");
-        $(".cs").val("");
-        $(".lrsID").val("");
-        $(".bL").val("");
-        $(".eL").val("");
-        $("#fedAids").val("");
-        $("#functClass").val("");
-        $("#cities").val("");
-        $("#rural").val("");
-        $(".local").css("display", "none");
-        $(".localValue").css("display", "none");
-    })
+    
 
     
 })
