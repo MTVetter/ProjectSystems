@@ -260,7 +260,7 @@ $(document).ready(function (){
                     outFields: ["*"],
                     name: "LRSID",
                     popupTemplate: routeTemplate,
-                    zoomScale: 45000,
+                    zoomScale: 80000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -271,7 +271,7 @@ $(document).ready(function (){
                     outFields: ["*"],
                     popupTemplate: parishTemplate,
                     name: "Parish",
-                    zoomScale: 45000,
+                    zoomScale: 80000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -283,7 +283,7 @@ $(document).ready(function (){
                     searchFields: ["PROJECT"],
                     name: "Projects Let in July 2012-August 2017",
                     popupTemplate: oldProjectTemplate,
-                    zoomScale: 45000,
+                    zoomScale: 80000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -295,7 +295,7 @@ $(document).ready(function (){
                     searchFields: ["PROJECT"],
                     name: "Projects Let in September 2017-June 2018",
                     popupTemplate: oldProjectTemplate,
-                    zoomScale: 45000,
+                    zoomScale: 80000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -307,7 +307,7 @@ $(document).ready(function (){
                     searchFields: ["PROJECT"],
                     name: "Projects Let in Fiscal Year 2018-2019",
                     popupTemplate: oldProjectTemplate,
-                    zoomScale: 45000,
+                    zoomScale: 80000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
