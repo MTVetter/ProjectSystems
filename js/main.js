@@ -252,36 +252,67 @@ $(document).ready(function (){
                 allPlaceholder: "Search for a LRSID...",
                 locationEnabled: false,
                 includeDefaultSources: false,
+                popupOpenOnSelect: false,
                 sources: [{
                     featureLayer: routes,
                     displayField: "RouteID",
                     searchFields: ["RouteID"],
                     outFields: ["*"],
                     name: "LRSID",
-                    popupTemplate: routeTemplate
+                    popupTemplate: routeTemplate,
+                    zoomScale: 45000,
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: [255, 255, 25],
+                        width: 5
+                    }
                 }, {
                     featureLayer: parish,
                     outFields: ["*"],
                     popupTemplate: parishTemplate,
-                    name: "Parish"
+                    name: "Parish",
+                    zoomScale: 45000,
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: [255, 255, 25],
+                        width: 5
+                    }
                 },{
                     featureLayer: lastFiveProjects,
                     displayField: "PROJECT",
                     searchFields: ["PROJECT"],
                     name: "Projects Let in July 2012-August 2017",
-                    popupTemplate: oldProjectTemplate
+                    popupTemplate: oldProjectTemplate,
+                    zoomScale: 45000,
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: [255, 255, 25],
+                        width: 5
+                    }
                 },{
                     featureLayer: lastYearProjects,
                     displayField: "PROJECT",
                     searchFields: ["PROJECT"],
                     name: "Projects Let in September 2017-June 2018",
-                    popupTemplate: oldProjectTemplate
+                    popupTemplate: oldProjectTemplate,
+                    zoomScale: 45000,
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: [255, 255, 25],
+                        width: 5
+                    }
                 }, {
                     featureLayer: nextYearProjects,
                     displayField: "PROJECT",
                     searchFields: ["PROJECT"],
                     name: "Projects Let in Fiscal Year 2018-2019",
-                    popupTemplate: oldProjectTemplate
+                    popupTemplate: oldProjectTemplate,
+                    zoomScale: 45000,
+                    resultSymbol: {
+                        type: "simple-line",
+                        color: [255, 255, 25],
+                        width: 5
+                    }
                 }]
             });
     
