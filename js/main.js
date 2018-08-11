@@ -1039,14 +1039,17 @@ $(document).ready(function (){
                 responseType: "json"
             }).then(function(response){
                 var cityJSON = response.data;
+                console.log(cityJSON);
                 if (cityJSON.features.length == 0){
                     attributes["UrbanizedArea"] = "00003";
                     $("#cities").find("option[value='00003']").attr("selected",true);
+                    $("#rural").find("option[value='R']").attr("selected", true);
                 } else {
                     var cityLocations = cityJSON.features[0].attributes;
                     var cityCode = cityLocations.Metro_Area_Code;
                     attributes["UrbanizedArea"] = cityCode;
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
+                    $("#rural").find("option[value='U']").attr("selected", true);
                 }
                 // var cityLocations = cityJSON.features[0].attributes;
                 // var cityCode = cityLocations.Metro_Area_Code;
@@ -1132,7 +1135,7 @@ $(document).ready(function (){
             $(".eL").val("");
             $("#fedAids").val("");
             $("#functClass").val("");
-            $("#cities").val("");
+            $("#cities").find("option[value='']").attr("selected",true);
             $("#rural").val("");
             $(".local").css("display", "none");
             $(".localValue").css("display", "none");
