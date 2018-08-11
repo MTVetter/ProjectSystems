@@ -104,7 +104,8 @@ body{
 }
 .edit-button:hover,
 .edit-button:focus{
-  background-color: #e4e4e4;
+  background-color: #0079c1;
+  color: white;
 }
 .edit-button:disabled{
     border: 2px solid red;
@@ -131,11 +132,34 @@ body{
 }
 .panelBtn:hover,
 .panelBtn:focus{
-  background-color: #e4e4e4;
+  background-color: #0079c1;
+  color: white;
 }
 .panelBtn:disabled{
     border: 2px solid red;
     color: darkgray;
     background-color: lightgrey;
+    cursor: not-allowed;
+}
+.panelHelpBtn,
+.panelHelpBtn:enabled{
+    font-size: 14px;
+    height: 32px;
+    width: 75%;
+    margin-top: 10px;
+    background-color: transparent;
+    border: 1px solid #db7093;
+    color: #db7093;
+    cursor: pointer;
+}
+.panelHelpBtn:hover,
+.panelHelpBtn:focus{
+    background-color: #db7093;
+    color: white;
+}
+.panelHelpBtn:disabled{
+    border: 2px solid red;
+    color: darkgray;
+    background-color: lightgray;
     cursor: not-allowed;
 }

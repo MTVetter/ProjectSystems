@@ -1135,7 +1135,7 @@ $(document).ready(function (){
             $(".eL").val("");
             $("#fedAids").val("");
             $("#functClass").val("");
-            $("#cities").find("option[value='']").attr("selected",true);
+            $("#cities option[value='']").attr("selected",true);
             $("#rural").val("");
             $(".local").css("display", "none");
             $(".localValue").css("display", "none");
@@ -1150,11 +1150,6 @@ $(document).ready(function (){
     //Close the panel after user is done looking at the information
     $("#closebutton").on("click", function(e){
         $("#panel").hide("slide");
-    });
-
-    //Open the panel when the user clicks the button to add a project
-    $(".edit").on("click", function(e){
-        $("#panel").show("slide");
     });
 
     //Create a dialog box when click the info button
@@ -1237,7 +1232,32 @@ $(document).ready(function (){
         }
     });
 
+    //Create a dialog box when click the help button
+    //Create a jQuery UI dialog box
+    var helpDialog = $("#helpDialog").dialog({
+        autoOpen: false,
+        height: 800,
+        width: 800,
+        modal: true,
+        position:{
+            my: "center center",
+            at: "center center",
+            of: "#wrapper"
+        },
+        buttons:{
+            "Close": function(){
+                helpDialog.dialog("close");
+            }
+        },
+        close: function (){
+            console.log("Dialog has successfully closed");
+        }
+    });
     
+    //Click the about button to open the dialog
+    $("#helpbtn").on("click", function(e){
+        helpDialog.dialog("open");
+    });
 
     
 })
