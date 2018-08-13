@@ -1236,8 +1236,8 @@ $(document).ready(function (){
     //Create a jQuery UI dialog box
     var helpDialog = $("#helpDialog").dialog({
         autoOpen: false,
-        height: 800,
-        width: 800,
+        height: window.innerHeight - 100,
+        width: window.innerWidth - 400,
         modal: true,
         position:{
             my: "center center",

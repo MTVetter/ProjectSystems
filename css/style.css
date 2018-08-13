@@ -35,6 +35,9 @@ body{
 .esri-view-user-storage{
     order: -1;
 }
+.projectTable{
+    margin-right: 50px;
+}
 #panel{
     position: relative;
     z-index: 1;
