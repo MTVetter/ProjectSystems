@@ -35,7 +35,7 @@ $(document).ready(function (){
         //Create the map and add layers
     
         var map = new Map({
-            basemap: "streets-navigation-vector"
+            basemap: "dark-gray-vector"
         });
     
         var homeExtent = new Extent({
@@ -172,7 +172,7 @@ $(document).ready(function (){
         var routes = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/FeatureServer/0",
             outFields: ["*"],
-            popupTemplate: routeTemplate,
+            // popupTemplate: routeTemplate,
             title: "LRSID_Routes",
             definitionExpression: "RouteID LIKE '%-%-1-%' OR RouteID LIKE '%-%-2-%'"
         });
@@ -191,7 +191,7 @@ $(document).ready(function (){
         var lastFiveProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/4",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Last Five Fiscal Year Projects",
+            title: "Projects Let in July 2012-August 2017",
             popupTemplate: oldProjectTemplate
         });
 
@@ -199,7 +199,7 @@ $(document).ready(function (){
         var lastYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/5",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Last Fiscal Year Projects",
+            title: "Projects Let in September 2017-June 2018",
             popupTemplate: oldProjectTemplate
         });
 
@@ -207,7 +207,7 @@ $(document).ready(function (){
         var nextYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/6",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Next Fiscal Year Projects",
+            title: "Projects Let in Fiscal Year 2018-2019",
             popupTemplate: oldProjectTemplate
         });
     
@@ -227,6 +227,13 @@ $(document).ready(function (){
             //Layer list
             var layerList = new LayerList({
                 view: view,
+                listItemCreatedFunction: function(event){
+                    const item = event.item;
+                    item.panel = {
+                        content: "legend",
+                        open: true
+                    };
+                }
             });
     
     
@@ -260,7 +267,7 @@ $(document).ready(function (){
                     outFields: ["*"],
                     name: "LRSID",
                     popupTemplate: routeTemplate,
-                    zoomScale: 80000,
+                    zoomScale: 120000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -271,7 +278,7 @@ $(document).ready(function (){
                     outFields: ["*"],
                     popupTemplate: parishTemplate,
                     name: "Parish",
-                    zoomScale: 80000,
+                    zoomScale: 200000,
                     resultSymbol: {
                         type: "simple-line",
                         color: [255, 255, 25],
@@ -408,52 +415,6 @@ $(document).ready(function (){
             });
             return checkArray;
         };
-    
-        //==================================
-        //Highlight the selected feature
-        var highlighPolygon = new SimpleFillSymbol({
-            color: [0,0,0,0],
-            style: "solid",
-            outline: {
-                color: [0,255,255,1],
-                width: "1.5px"
-            }
-        });
-    
-        var highlightLine = new SimpleLineSymbol({
-            color: [0,255,255,1],
-            width: 4
-        });
-    
-        view.on("click", function(event){
-            var clickPoint = {
-                x: event.x,
-                y: event.y
-            };
-            view.hitTest(clickPoint).then(updateGraphics);
-        });
-    
-        function updateGraphics(response){
-            view.graphics.removeAll();
-            var resultGraphic = response
-    
-            if (resultGraphic.results.length > 0){
-                var selectionGraphic = resultGraphic.results[0].graphic;
-                if (selectionGraphic.geometry.type == "polygon"){
-                    selectionGraphic.symbol = highlighPolygon;
-                } else if (selectionGraphic.geometry.type == "polyline"){
-                    selectionGraphic.symbol = highlightLine;
-                };
-                view.graphics.add(selectionGraphic);
-            }
-        }
-    
-        //Determine when to remove highligh graphics
-        view.popup.watch("visible", function(visible){
-            if (visible == false){
-                view.graphics.removeAll();
-            }
-        });
 
         //=============================
         //Function to enable drawing graphics
@@ -539,8 +500,10 @@ $(document).ready(function (){
             if (lrsData){
                 attributes["LRSID"] = lrsData;
                 getLogmiles(addFeature, attributes, lrsData);
+                getAid(addFeature, attributes);
             } else {
                 getLRS(addFeature, attributes);
+                getAid(addFeature, attributes);
             }
 
             //Check to see if user entered a rural/urban code
@@ -551,7 +514,7 @@ $(document).ready(function (){
                 getRural(addFeature, attributes);
             }
 
-            //Check to see if user entered a fed aid value
+            // //Check to see if user entered a fed aid value
             // var aidData = $(".fedAids").val();
             // if (aidData){
             //     attributes["FedAid"] = aidData;
@@ -604,6 +567,7 @@ $(document).ready(function (){
                     alert("Proposed Project has successfully posted to the database!");
                     view.graphics.removeAll();
                     projects.refresh();
+                    clearFields();
                 },
                 error: (error) =>{
                     console.log(error);
@@ -803,32 +767,122 @@ $(document).ready(function (){
                             $(".local").css("display", "table-cell");
                             $(".localValue").css("display", "table-cell");
                             $(".functClass").css("display", "table-cell");
+
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                var beginLocation = json.locations[0].results[0];
+                                var beginMeasure = beginLocation.measure;
+                                var endLocation = json.locations[1].results[0];
+                                var endMeasure = endLocation.measure;
+
+                                //Check to see if the measure from the first point is bigger than second measure
+                                if (beginMeasure > endMeasure){
+                                    //If first measure is greater then put it as end logmile
+                                    attributes["BeginLogmile"] = endMeasure;
+                                    $("#beginLogmile input:text").val(endMeasure);
+                                    attributes["EndLogmile"] = beginMeasure;
+                                    $("#endLogmile input:text").val(beginMeasure);
+                                } else {
+                                    //If first measure isn't greater then leave it alone
+                                    attributes["BeginLogmile"] = beginMeasure;
+                                    $("#beginLogmile input:text").val(beginMeasure);
+                                    attributes["EndLogmile"] = endMeasure;
+                                    $("#endLogmile input:text").val(endMeasure);
+                                }
+                            });
+
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                console.log(json);
+                                if (json.features.length == 0){
+                                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/3/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                        responseType: "json"
+                                    }).then(function(response){
+                                        var response = response.data;
+                                        console.log(response);
+                                        if (response.features.length == 0){
+                                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/4/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                responseType: "json"
+                                            }).then(function(response){
+                                                var majorCollectorResponse = response.data;
+                                                console.log(majorCollectorResponse);
+                                                if (majorCollectorResponse.features.length == 0){
+                                                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/5/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                        responseType: "json"
+                                                    }).then(function(response){
+                                                        var minorCollectorResponse = response.data;
+                                                        console.log(minorCollectorResponse);
+                                                        if (minorCollectorResponse.features.length == 0){
+                                                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/6/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                                responseType: "json"
+                                                            }).then(function(response){
+                                                                var localResponse = response.data;
+                                                                console.log(localResponse);
+                                                                if (localResponse.features.length == 0){
+                                                                    attributes["FunctionalSystem"] = "N";
+                                                                    $("#functClass").find("option[value='N']").attr("selected", true);
+                                                                } else {
+                                                                    var fedaid6 = localResponse.features[0].attributes.FunctionalSystem;
+                                                                    attributes["FunctionalSystem"] = "L";
+                                                                    $("#functClass").find("option[value='L']").attr("selected", true);
+                                                                }
+                                                            });
+                                                        } else {
+                                                            var fedaid5 = minorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                                            attributes["FunctionalSystem"] = "R";
+                                                            $("#functClass").find("option[value='R']").attr("selected", true);
+                                                        }
+                                                    });
+                                                } else {
+                                                    var fedaid4 = majorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                                    attributes["FunctionalSystem"] = "C";
+                                                    $("#functClass").find("option[value='C']").attr("selected", true);
+                                                }
+                                            });
+                                        } else {
+                                            var fedaid3 = response.features[0].attributes.FunctionalSystem;
+                                            attributes["FunctionalSystem"] = "C";
+                                            $("#functClass").find("option[value='M']").attr("selected", true);
+                                        }
+                                    });
+                                } else {
+                                    var fedaid2 = json.features[0].attributes.FunctionalSystem;
+                                    attributes["FunctionalSystem"] = "P";
+                                    $("#functClass").find("option[value='P']").attr("selected", true);
+                                }
+                            });
+                        } else {
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                var beginLocation = json.locations[0].results[0];
+                                var beginMeasure = beginLocation.measure;
+                                var endLocation = json.locations[1].results[0];
+                                var endMeasure = endLocation.measure;
+
+                                //Check to see if the measure from the first point is bigger than second measure
+                                if (beginMeasure > endMeasure){
+                                    //If first measure is greater then put it as end logmile
+                                    attributes["BeginLogmile"] = endMeasure;
+                                    $("#beginLogmile input:text").val(endMeasure);
+                                    attributes["EndLogmile"] = beginMeasure;
+                                    $("#endLogmile input:text").val(beginMeasure);
+                                } else {
+                                    //If first measure isn't greater then leave it alone
+                                    attributes["BeginLogmile"] = beginMeasure;
+                                    $("#beginLogmile input:text").val(beginMeasure);
+                                    attributes["EndLogmile"] = endMeasure;
+                                    $("#endLogmile input:text").val(endMeasure);
+                                }
+                            });
                         }
 
-                        esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                            responseType: "json"
-                        }).then(function(response){
-                            var json = response.data;
-                            var beginLocation = json.locations[0].results[0];
-                            var beginMeasure = beginLocation.measure;
-                            var endLocation = json.locations[1].results[0];
-                            var endMeasure = endLocation.measure;
-
-                            //Check to see if the measure from the first point is bigger than second measure
-                            if (beginMeasure > endMeasure){
-                                //If first measure is greater then put it as end logmile
-                                attributes["BeginLogmile"] = endMeasure;
-                                $("#beginLogmile input:text").val(endMeasure);
-                                attributes["EndLogmile"] = beginMeasure;
-                                $("#endLogmile input:text").val(beginMeasure);
-                            } else {
-                                //If first measure isn't greater then leave it alone
-                                attributes["BeginLogmile"] = beginMeasure;
-                                $("#beginLogmile input:text").val(beginMeasure);
-                                attributes["EndLogmile"] = endMeasure;
-                                $("#endLogmile input:text").val(endMeasure);
-                            }
-                        });
+                        
                     } else {
                         var road = secondLocation.routeId;
                         attributes["LRSID"] = road;
@@ -838,91 +892,127 @@ $(document).ready(function (){
                             $(".local").css("display", "table-cell");
                             $(".localValue").css("display", "table-cell");
                             $(".functClass").css("display", "table-cell");
-                        }
-    
-                        esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                            responseType: "json"
-                        }).then(function(response){
-                            var json = response.data;
-                            var beginLocation = json.locations[0].results[0];
-                            var beginMeasure = beginLocation.measure;
-                            var endLocation = json.locations[1].results[0];
-                            var endMeasure = endLocation.measure;
-    
-                            //Check to see if the measure from the first point is bigger than second measure
-                            if (beginMeasure > endMeasure){
-                                //If first measure is greater then put it as end logmile
-                                attributes["BeginLogmile"] = endMeasure;
-                                $("#beginLogmile input:text").val(endMeasure);
-                                attributes["EndLogmile"] = beginMeasure;
-                                $("#endLogmile input:text").val(beginMeasure);
-                            } else {
-                                //If first measure isn't greater then leave it alone
-                                attributes["BeginLogmile"] = beginMeasure;
-                                $("#beginLogmile input:text").val(beginMeasure);
-                                attributes["EndLogmile"] = endMeasure;
-                                $("#endLogmile input:text").val(endMeasure);
-                            }
-                        });
-                    }
-                
 
-                    // esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                    //     responseType: "json"
-                    // }).then(function(response){
-                    //     var json = response.data;
-                    //     var locations = json.locations[0].results[0];
-                    //     var measure = locations.measure;
-                    //     attributes["EndLogmile"] = measure;
-                    //     $("#endLogmile input:text").val(measure);
-                    // });
-                } else {
-                    var locations = json.locations[0].results[0];
-                    var road = locations.routeId;
-                    attributes["LRSID"] = road;
-                    $("#lrsid input:text").val(road);
-
-                    if (road.length > 12){
-                        $(".local").css("display", "table-cell");
-                        $(".localValue").css("display", "table-cell");
-                        $(".functClass").css("display", "table-cell");
-                    }
-
-                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                        responseType: "json"
-                    }).then(function(response){
-                        var json = response.data;
-                        var beginLocation = json.locations[0].results[0];
-                        var beginMeasure = beginLocation.measure;
-                        var endLocation = json.locations[1].results[0];
-                        var endMeasure = endLocation.measure;
-
-                        //Check to see if the measure from the first point is bigger than second measure
-                        if (beginMeasure > endMeasure){
-                            //If first measure is greater then put it as end logmile
-                            attributes["BeginLogmile"] = endMeasure;
-                            $("#beginLogmile input:text").val(endMeasure);
-                            attributes["EndLogmile"] = beginMeasure;
-                            $("#endLogmile input:text").val(beginMeasure);
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                var beginLocation = json.locations[0].results[0];
+                                var beginMeasure = beginLocation.measure;
+                                var endLocation = json.locations[1].results[0];
+                                var endMeasure = endLocation.measure;
+        
+                                //Check to see if the measure from the first point is bigger than second measure
+                                if (beginMeasure > endMeasure){
+                                    //If first measure is greater then put it as end logmile
+                                    attributes["BeginLogmile"] = endMeasure;
+                                    $("#beginLogmile input:text").val(endMeasure);
+                                    attributes["EndLogmile"] = beginMeasure;
+                                    $("#endLogmile input:text").val(beginMeasure);
+                                } else {
+                                    //If first measure isn't greater then leave it alone
+                                    attributes["BeginLogmile"] = beginMeasure;
+                                    $("#beginLogmile input:text").val(beginMeasure);
+                                    attributes["EndLogmile"] = endMeasure;
+                                    $("#endLogmile input:text").val(endMeasure);
+                                }
+                            });
+                            
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                console.log(json);
+                                if (json.features.length == 0){
+                                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/3/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                        responseType: "json"
+                                    }).then(function(response){
+                                        var response = response.data;
+                                        console.log(response);
+                                        if (response.features.length == 0){
+                                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/4/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                responseType: "json"
+                                            }).then(function(response){
+                                                var majorCollectorResponse = response.data;
+                                                console.log(majorCollectorResponse);
+                                                if (majorCollectorResponse.features.length == 0){
+                                                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/5/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                        responseType: "json"
+                                                    }).then(function(response){
+                                                        var minorCollectorResponse = response.data;
+                                                        console.log(minorCollectorResponse);
+                                                        if (minorCollectorResponse.features.length == 0){
+                                                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/6/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                                responseType: "json"
+                                                            }).then(function(response){
+                                                                var localResponse = response.data;
+                                                                console.log(localResponse);
+                                                                if (localResponse.features.length == 0){
+                                                                    attributes["FunctionalSystem"] = "N";
+                                                                    $("#functClass").find("option[value='N']").attr("selected", true);
+                                                                } else {
+                                                                    var fedaid6 = localResponse.features[0].attributes.FunctionalSystem;
+                                                                    attributes["FunctionalSystem"] = "L";
+                                                                    $("#functClass").find("option[value='L']").attr("selected", true);
+                                                                }
+                                                            });
+                                                        } else {
+                                                            var fedaid5 = minorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                                            attributes["FunctionalSystem"] = "R";
+                                                            $("#functClass").find("option[value='R']").attr("selected", true);
+                                                        }
+                                                    });
+                                                } else {
+                                                    var fedaid4 = majorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                                    attributes["FunctionalSystem"] = "C";
+                                                    $("#functClass").find("option[value='C']").attr("selected", true);
+                                                }
+                                            });
+                                        } else {
+                                            var fedaid3 = response.features[0].attributes.FunctionalSystem;
+                                            attributes["FunctionalSystem"] = "M";
+                                            $("#functClass").find("option[value='M']").attr("selected", true);
+                                        }
+                                    });
+                                } else {
+                                    var fedaid2 = json.features[0].attributes.FunctionalSystem;
+                                    attributes["FunctionalSystem"] = "P";
+                                    $("#functClass").find("option[value='P']").attr("selected", true);
+                                }
+                            });
                         } else {
-                            //If first measure isn't greater then leave it alone
-                            attributes["BeginLogmile"] = beginMeasure;
-                            $("#beginLogmile input:text").val(beginMeasure);
-                            attributes["EndLogmile"] = endMeasure;
-                            $("#endLogmile input:text").val(endMeasure);
-                        }
-                    });
-                } 
+                            var locations = json.locations[0].results[0];
+                            var road = locations.routeId;
+                            attributes["LRSID"] = road;
+                            $("#lrsid input:text").val(road);
 
-                    // esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                    //     responseType: "json"
-                    // }).then(function(response){
-                    //     var json = response.data;
-                    //     var locations = json.locations[0].results[0];
-                    //     var measure = locations.measure;
-                    //     attributes["EndLogmile"] = measure;
-                    //     $("#endLogmile input:text").val(measure);
-                    // });  
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                                responseType: "json"
+                            }).then(function(response){
+                                var json = response.data;
+                                var beginLocation = json.locations[0].results[0];
+                                var beginMeasure = beginLocation.measure;
+                                var endLocation = json.locations[1].results[0];
+                                var endMeasure = endLocation.measure;
+
+                                //Check to see if the measure from the first point is bigger than second measure
+                                if (beginMeasure > endMeasure){
+                                    //If first measure is greater then put it as end logmile
+                                    attributes["BeginLogmile"] = endMeasure;
+                                    $("#beginLogmile input:text").val(endMeasure);
+                                    attributes["EndLogmile"] = beginMeasure;
+                                    $("#endLogmile input:text").val(beginMeasure);
+                                } else {
+                                    //If first measure isn't greater then leave it alone
+                                    attributes["BeginLogmile"] = beginMeasure;
+                                    $("#beginLogmile input:text").val(beginMeasure);
+                                    attributes["EndLogmile"] = endMeasure;
+                                    $("#endLogmile input:text").val(endMeasure);
+                                }
+                            });
+                        }
+                    }
+                }
             });
             return attributes;
         }
@@ -1010,14 +1100,14 @@ $(document).ready(function (){
             var y2 = path.geometry.paths[0][num][1];
 
             //Determine the district the project is located in
-            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/Roads_and_Highways/FeatureServer/14/query?geometry={%22paths%22:[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatailRel=esriSpatialRelIntersects&outFields=*&f=pjson",{
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/Roads_and_Highways/FeatureServer/14/query?where=&objectIds=&time=&geometry={["+x+","+y+"]}&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
                 responseType: "json"
             }).then(function(response){
-                var parishJSON = response.data;
-                var parishLocations = parishJSON.features[0].attributes;
-                var district = parishLocations.DOTD_Distr;
-                attributes["DOTDDistrict"] = district;
-                $("#dotdDistrict input:text").val(district);
+                var json = response.data;
+                console.log(json);
+                if (json.features.length > 1){
+                    alert(json.features.length);
+                }
             });
             return attributes;
         }
@@ -1051,16 +1141,6 @@ $(document).ready(function (){
                     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
                     $("#rural").find("option[value='U']").attr("selected", true);
                 }
-                // var cityLocations = cityJSON.features[0].attributes;
-                // var cityCode = cityLocations.Metro_Area_Code;
-                // if (cityCode){
-                //     attributes["UrbanizedArea"] = cityCode;
-                //     $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);                    
-                // } else {
-                //     console.log("It finally worked!");
-                //     attributes["UrbanizedArea"] = "00003";
-                //     $("#cities").find("option[value='00003']").attr("selected",true);
-                // }
             });
             return attributes;
         }
@@ -1125,8 +1205,8 @@ $(document).ready(function (){
             }
         }
 
-        //Clear the input boxes/select
-        $("#clearbtn").on("click", function(){
+        //Function to clear the fields
+        function clearFields(){
             $(".dotdDistrict").val("");
             $(".parishNum").val("");
             $(".cs").val("");
@@ -1139,6 +1219,11 @@ $(document).ready(function (){
             $("#rural").val("");
             $(".local").css("display", "none");
             $(".localValue").css("display", "none");
+        }
+
+        //Clear the input boxes/select
+        $("#clearbtn").on("click", function(){
+            clearFields();
             view.graphics.removeAll();
         });
 
