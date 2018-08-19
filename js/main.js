@@ -182,6 +182,7 @@ $(document).ready(function (){
             url: "https://services.arcgis.com/PLiuXYMBpMK5h36e/arcgis/rest/services/ProjectSystems/FeatureServer/0",
             outFields: ["*"],
             popupTemplate: projectTemplate,
+            title: "Proposed Projects",
             capabilites: {
                 "supportsAdd": true
             }
@@ -191,7 +192,7 @@ $(document).ready(function (){
         var lastFiveProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/4",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Projects Let in July 2012-August 2017",
+            title: "Projects Started in July 2012-August 2017",
             popupTemplate: oldProjectTemplate
         });
 
@@ -199,7 +200,7 @@ $(document).ready(function (){
         var lastYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/5",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Projects Let in September 2017-June 2018",
+            title: "Projects Started in September 2017-June 2018",
             popupTemplate: oldProjectTemplate
         });
 
@@ -207,7 +208,7 @@ $(document).ready(function (){
         var nextYearProjects = new FeatureLayer({
             url: "https://giswebnew.dotd.la.gov/arcgis/rest/services/Static_Data/2019_Roadshow/FeatureServer/6",
             outFields: ["PROJECT", "DISTRICT", "PARISH_NAME", "URBANIZED_AREA", "ROUTE", "House_District", "Senate_District"],
-            title: "Projects Let in Fiscal Year 2018-2019",
+            title: "Projects Started in Fiscal Year 2018-2019",
             popupTemplate: oldProjectTemplate
         });
     
@@ -375,10 +376,12 @@ $(document).ready(function (){
                 lastFiveProjects.definitionExpression = "DISTRICT LIKE '" +districtFilterValue+ "'";
                 lastYearProjects.definitionExpression = "DISTRICT LIKE '"+districtFilterValue+ "'";
                 nextYearProjects.definitionExpression = "DISTRICT LIKE '" +districtFilterValue+ "'";
+                projects.definitionExpression = "DOTDDistrict LIKE '" +districtFilterValue+ "'";
             } else if (checkValues[0] === "parish"){
                 lastFiveProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
                 lastYearProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
                 nextYearProjects.definitionExpression = "PARISH LIKE '" +parishFilterValue+ "'";
+                projects.definitionExpression = "Parish LIKE '" +parishFilterValue+ "'";
             } else if (checkValues[0] === "senateDistrict"){
                 lastFiveProjects.definitionExpression = "Senate_District LIKE '" +senateFilterValue+ "'";
                 lastYearProjects.definitionExpression = "Senate_District LIKE '" +senateFilterValue+ "'";
@@ -400,6 +403,7 @@ $(document).ready(function (){
             lastFiveProjects.definitionExpression = "";
             lastYearProjects.definitionExpression = "";
             nextYearProjects.definitionExpression = "";
+            projects.definitionExpression = "";
             queryExpand.iconNumber = 0;
             queryExpand.collapse();
             $("#parishFilter").val("");
@@ -1341,6 +1345,11 @@ $(document).ready(function (){
     
     //Click the about button to open the dialog
     $("#helpbtn").on("click", function(e){
+        helpDialog.dialog("open");
+    });
+
+    //Click the help button
+    $(".title").on("click", function(e){
         helpDialog.dialog("open");
     });
 

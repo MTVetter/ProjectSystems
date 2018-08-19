@@ -166,3 +166,6 @@ body{
     background-color: lightgray;
     cursor: not-allowed;
 }
+#help{
+    cursor: pointer;
+}
