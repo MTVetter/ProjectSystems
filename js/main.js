@@ -758,9 +758,10 @@ $(document).ready(function (){
                     var firstLocation = json.locations[0].results[0];
                     var secondLocation = json.locations[0].results[1];
                     var string = JSON.stringify(firstLocation, ["routeId"]);
+                    var string2 = JSON.stringify(secondLocation, ["routeId"]);
                     console.log(string);
-                    var confirmLoc = confirm("Do you want to use " +string+ "?\nNote: For non-divided roadways "+
-                    "you more than likely want an LRSID like 000-00-1-000");
+                    var confirmLoc = confirm("Click OK to use " +string+ ".\nOtherwise click Cancel to use " +string2+".\nNote: For non-divided roadways "+
+                    "you more than likely want an LRSID like 000-00-1-000 or 000000000000001000");
                     if (confirmLoc == true){
                         var road = firstLocation.routeId;
                         attributes["LRSID"] = road;
