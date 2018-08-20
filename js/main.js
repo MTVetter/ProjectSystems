@@ -524,13 +524,13 @@ $(document).ready(function (){
             //     getAid(addFeature, attributes);
             // }
 
-            // //Check to see if user entered a functional class
-            // var functData = $(".functClass").val();
-            // if (functData){
-            //     attributes["FunctionalSystem"] = functData;
-            // } else {
-            //     getFunctional(addFeature, attributes);
-            // }
+            //Check to see if user entered a functional class
+            var functData = $(".functClass").val();
+            if (functData){
+                attributes["FunctionalSystem"] = functData;
+            } else {
+                getFunctional(addFeature, attributes);
+            }
 
             //Check to see if user entered an urbanized area
             var urbanizedData = $("#cities").val();
@@ -1193,15 +1193,68 @@ $(document).ready(function (){
             var x2 = path.geometry.paths[0][num][0];
             var y2 = path.geometry.paths[0][num][1];
 
-            //Determine the district the project is located in
-            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Boundaries/LA_Parishes/FeatureServer/0/query?where=&objectIds=&time=&geometry="+x+","+ y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+            //Determine the functional system the project is located on
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
                 responseType: "json"
             }).then(function(response){
-                var parishJSON = response.data;
-                var parishLocations = parishJSON.features[0].attributes;
-                var district = parishLocations.DOTD_Distr;
-                attributes["DOTDDistrict"] = district;
-                $("#dotdDistrict input:text").val(district);
+                var json = response.data;
+                console.log(json);
+                if (json.features.length == 0){
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/3/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                        responseType: "json"
+                    }).then(function(response){
+                        var response = response.data;
+                        console.log(response);
+                        if (response.features.length == 0){
+                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/4/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                responseType: "json"
+                            }).then(function(response){
+                                var majorCollectorResponse = response.data;
+                                console.log(majorCollectorResponse);
+                                if (majorCollectorResponse.features.length == 0){
+                                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/5/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                        responseType: "json"
+                                    }).then(function(response){
+                                        var minorCollectorResponse = response.data;
+                                        console.log(minorCollectorResponse);
+                                        if (minorCollectorResponse.features.length == 0){
+                                            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/6/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                                                responseType: "json"
+                                            }).then(function(response){
+                                                var localResponse = response.data;
+                                                console.log(localResponse);
+                                                if (localResponse.features.length == 0){
+                                                    attributes["FunctionalSystem"] = "N";
+                                                    $("#functClass").find("option[value='N']").attr("selected", true);
+                                                } else {
+                                                    var fedaid6 = localResponse.features[0].attributes.FunctionalSystem;
+                                                    attributes["FunctionalSystem"] = "L";
+                                                    $("#functClass").find("option[value='L']").attr("selected", true);
+                                                }
+                                            });
+                                        } else {
+                                            var fedaid5 = minorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                            attributes["FunctionalSystem"] = "R";
+                                            $("#functClass").find("option[value='R']").attr("selected", true);
+                                        }
+                                    });
+                                } else {
+                                    var fedaid4 = majorCollectorResponse.features[0].attributes.FunctionalSystem;
+                                    attributes["FunctionalSystem"] = "C";
+                                    $("#functClass").find("option[value='C']").attr("selected", true);
+                                }
+                            });
+                        } else {
+                            var fedaid3 = response.features[0].attributes.FunctionalSystem;
+                            attributes["FunctionalSystem"] = "C";
+                            $("#functClass").find("option[value='M']").attr("selected", true);
+                        }
+                    });
+                } else {
+                    var fedaid2 = json.features[0].attributes.FunctionalSystem;
+                    attributes["FunctionalSystem"] = "P";
+                    $("#functClass").find("option[value='P']").attr("selected", true);
+                }
             });
             return attributes;
         }
