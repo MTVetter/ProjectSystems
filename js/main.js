@@ -504,10 +504,8 @@ $(document).ready(function (){
             if (lrsData){
                 attributes["LRSID"] = lrsData;
                 getLogmiles(addFeature, attributes, lrsData);
-                getAid(addFeature, attributes);
             } else {
                 getLRS(addFeature, attributes);
-                getAid(addFeature, attributes);
             }
 
             //Check to see if user entered a rural/urban code
@@ -755,6 +753,7 @@ $(document).ready(function (){
                 responseType: "json"
             }).then(function(response){
                 var json = response.data;
+                console.log(json);
                 if (json.locations[0].results.length > 1){
                     var firstLocation = json.locations[0].results[0];
                     var secondLocation = json.locations[0].results[1];
@@ -1016,6 +1015,34 @@ $(document).ready(function (){
                             });
                         }
                     }
+                } else {
+                    var road = json.locations[0].results[0].routeId;
+                    attributes["LRSID"] = road;
+                    $("#lrsid input:text").val(road);
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +road+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +road+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
+                        responseType: "json"
+                    }).then(function(response){
+                        var json = response.data;
+                        var beginLocation = json.locations[0].results[0];
+                        var beginMeasure = beginLocation.measure;
+                        var endLocation = json.locations[1].results[0];
+                        var endMeasure = endLocation.measure;
+
+                        //Check to see if the measure from the first point is bigger than second measure
+                        if (beginMeasure > endMeasure){
+                            //If first measure is greater then put it as end logmile
+                            attributes["BeginLogmile"] = endMeasure;
+                            $("#beginLogmile input:text").val(endMeasure);
+                            attributes["EndLogmile"] = beginMeasure;
+                            $("#endLogmile input:text").val(beginMeasure);
+                        } else {
+                            //If first measure isn't greater then leave it alone
+                            attributes["BeginLogmile"] = beginMeasure;
+                            $("#beginLogmile input:text").val(beginMeasure);
+                            attributes["EndLogmile"] = endMeasure;
+                            $("#endLogmile input:text").val(endMeasure);
+                        }
+                    });
                 }
             });
             return attributes;
@@ -1033,24 +1060,29 @@ $(document).ready(function (){
             var x2 = path.geometry.paths[0][num][0];
             var y2 = path.geometry.paths[0][num][1];
 
-            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x+",'y':" +y+ "}}]&tolerance=10&inSR=102100", {
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x+",'y':" +y+ "}},{'routeId':'" +data+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
                 responseType: "json"
             }).then(function(response){
                 var json = response.data;
-                var locations = json.locations[0].results[0];
-                var measure = locations.measure;
-                attributes["BeginLogmile"] = measure;
-                $("#beginLogmile input:text").val(measure);
-            });
+                var beginLocation = json.locations[0].results[0];
+                var beginMeasure = beginLocation.measure;
+                var endLocation = json.locations[1].results[0];
+                var endMeasure = endLocation.measure;
 
-            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/geometryToMeasure?f=json&locations=[{'routeId':'" +data+ "','geometry':{'x':" + x2+",'y':" +y2+ "}}]&tolerance=10&inSR=102100", {
-                responseType: "json"
-            }).then(function(response){
-                var json = response.data;
-                var locations = json.locations[0].results[0];
-                var measure = locations.measure;
-                attributes["EndLogmile"] = measure;
-                $("#endLogmile input:text").val(measure);
+                //Check to see if the measure from the first point is bigger than second measure
+                if (beginMeasure > endMeasure){
+                    //If first measure is greater then put it as end logmile
+                    attributes["BeginLogmile"] = endMeasure;
+                    $("#beginLogmile input:text").val(endMeasure);
+                    attributes["EndLogmile"] = beginMeasure;
+                    $("#endLogmile input:text").val(beginMeasure);
+                } else {
+                    //If first measure isn't greater then leave it alone
+                    attributes["BeginLogmile"] = beginMeasure;
+                    $("#beginLogmile input:text").val(beginMeasure);
+                    attributes["EndLogmile"] = endMeasure;
+                    $("#endLogmile input:text").val(endMeasure);
+                }
             });
             return attributes;
         }
