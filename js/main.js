@@ -795,6 +795,8 @@ $(document).ready(function (){
                                     attributes["EndLogmile"] = endMeasure;
                                     $("#endLogmile input:text").val(endMeasure);
                                 }
+
+                                translate(road, beginMeasure, x, y, attributes);
                             });
 
                             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
@@ -920,6 +922,8 @@ $(document).ready(function (){
                                     attributes["EndLogmile"] = endMeasure;
                                     $("#endLogmile input:text").val(endMeasure);
                                 }
+
+                                translate(road, beginMeasure, x, y, attributes);
                             });
                             
                             esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
@@ -1048,6 +1052,8 @@ $(document).ready(function (){
                                 attributes["EndLogmile"] = endMeasure;
                                 $("#endLogmile input:text").val(endMeasure);
                             }
+
+                            translate(road, beginMeasure, x, y, attributes);
                         });
 
                         esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/LA_RoadwayFunctionalClassification/FeatureServer/2/query?where=&objectIds=&time=&geometry={'paths':[[["+x+","+y+"],["+x2+","+y2+"]]]}&geometryType=esriGeometryPolyline&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
@@ -1263,14 +1269,16 @@ $(document).ready(function (){
                 console.log(cityJSON);
                 if (cityJSON.features.length == 0){
                     attributes["UrbanizedArea"] = "00003";
-                    $("#cities").find("option[value='00003']").attr("selected",true);
-                    $("#rural").find("option[value='R']").attr("selected", true);
+                    attributes["UrbanRural"] = "R";
+                    $("#cities").val("00003");
+                    $("#rural").val("R");
                 } else {
                     var cityLocations = cityJSON.features[0].attributes;
                     var cityCode = cityLocations.Metro_Area_Code;
                     attributes["UrbanizedArea"] = cityCode;
-                    $("#cities").find("option[value='" +cityCode+"']").attr("selected",true);
-                    $("#rural").find("option[value='U']").attr("selected", true);
+                    attributes["UrbanRural"] = "U";
+                    $("#cities").val(cityCode);
+                    $("#rural").val("U");
                 }
             });
             return attributes;
@@ -1349,6 +1357,56 @@ $(document).ready(function (){
                     var fedaid2 = json.features[0].attributes.FunctionalSystem;
                     attributes["FunctionalSystem"] = "P";
                     $("#functClass").find("option[value='P']").attr("selected", true);
+                }
+            });
+            return attributes;
+        }
+
+        //Function to get the translated RouteID
+        function translate(routeid, measure, x, y, attributes){
+            esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/State_LRS_Route_Networks/MapServer/exts/LRSServer/networkLayers/0/translate?f=json&locations=[{'routeId':'"+routeid+"','measure':'"+measure+"'}]&targetNetworkLayerIds=1",{
+                responseType: "json"
+            }).then(function(response){
+                var json = response.data;
+                var location = json.locations["0"].translatedLocations["0"].routeId;
+                var n = location.substr(location.length - 5);
+                var slice = n.slice(0,1);
+                if (slice != 1){
+                    var location2 = json.locations["0"].translatedLocations["1"].routeId;
+                    console.log(location2);
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/Roads_and_Highways/FeatureServer/14/query?where=RouteId+%3D+%27"+location2+"%27&objectIds=&time=&geometry='x':"+x+",'y':"+y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=RouteId%2C+FederalFundingStatus&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                        responseType: "json"
+                    }).then(function(response){
+                        var fedAidResponse2 = response.data;
+                        var fundingStatus2 = fedAidResponse2.features["0"].attributes.FederalFundingStatus;
+                        if (fundingStatus2 == "1"){
+                            attributes["FedAid"] = "I";
+                            $("#fedAids").val("I");
+                        } else if (fundingStatus2 == "2" || fundingStatus2 == "4" || fundingStatus2 == "5"){
+                            attributes["FedAid"] = "Z";
+                            $("#fedAids").val("Z");
+                        } else if (fundingStatus2 == "3"){
+                            attributes["FedAid"] = "O";
+                            $("#fedAids").val("O");
+                        }
+                    });
+                } else {
+                    esriRequest("https://giswebnew.dotd.la.gov/arcgis/rest/services/Transportation/Roads_and_Highways/FeatureServer/14/query?where=RouteId+%3D+%27"+location+"%27&objectIds=&time=&geometry='x':"+x+",'y':"+y+"&geometryType=esriGeometryPoint&inSR=102100&spatialRel=esriSpatialRelIntersects&distance=10&units=esriSRUnit_Foot&relationParam=&outFields=RouteId%2C+FederalFundingStatus&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=pjson",{
+                        responseType: "json"
+                    }).then(function(response){
+                        var fedAidResponse = response.data;
+                        var fundingStatus = fedAidResponse.features["0"].attributes.FederalFundingStatus;
+                        if (fundingStatus == "1"){
+                            attributes["FedAid"] = "I";
+                            $("#fedAids").val("I");
+                        } else if (fundingStatus == "2" || fundingStatus == "4" || fundingStatus == "5"){
+                            attributes["FedAid"] = "Z";
+                            $("#fedAids").val("Z");
+                        } else if (fundingStatus == "3"){
+                            attributes["FedAid"] = "O";
+                            $("#fedAids").val("O");
+                        }
+                    })
                 }
             });
             return attributes;
