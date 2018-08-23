@@ -777,9 +777,9 @@ $(document).ready(function (){
                             }).then(function(response){
                                 var json = response.data;
                                 var beginLocation = json.locations[0].results[0];
-                                var beginMeasure = beginLocation.measure;
+                                var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                                 var endLocation = json.locations[1].results[0];
-                                var endMeasure = endLocation.measure;
+                                var endMeasure = Math.round(endLocation.measure * 1000)/1000;
 
                                 //Check to see if the measure from the first point is bigger than second measure
                                 if (beginMeasure > endMeasure){
@@ -867,9 +867,9 @@ $(document).ready(function (){
                             }).then(function(response){
                                 var json = response.data;
                                 var beginLocation = json.locations[0].results[0];
-                                var beginMeasure = beginLocation.measure;
+                                var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                                 var endLocation = json.locations[1].results[0];
-                                var endMeasure = endLocation.measure;
+                                var endMeasure = Math.round(endLocation.measure * 1000)/1000;
 
                                 //Check to see if the measure from the first point is bigger than second measure
                                 if (beginMeasure > endMeasure){
@@ -904,9 +904,9 @@ $(document).ready(function (){
                             }).then(function(response){
                                 var json = response.data;
                                 var beginLocation = json.locations[0].results[0];
-                                var beginMeasure = beginLocation.measure;
+                                var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                                 var endLocation = json.locations[1].results[0];
-                                var endMeasure = endLocation.measure;
+                                var endMeasure = Math.round(endLocation.measure * 1000)/1000;
         
                                 //Check to see if the measure from the first point is bigger than second measure
                                 if (beginMeasure > endMeasure){
@@ -999,9 +999,9 @@ $(document).ready(function (){
                             }).then(function(response){
                                 var json = response.data;
                                 var beginLocation = json.locations[0].results[0];
-                                var beginMeasure = beginLocation.measure;
+                                var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                                 var endLocation = json.locations[1].results[0];
-                                var endMeasure = endLocation.measure;
+                                var endMeasure = Math.round(endLocation.measure * 1000)/1000;
 
                                 //Check to see if the measure from the first point is bigger than second measure
                                 if (beginMeasure > endMeasure){
@@ -1034,9 +1034,9 @@ $(document).ready(function (){
                         }).then(function(response){
                             var json = response.data;
                             var beginLocation = json.locations[0].results[0];
-                            var beginMeasure = beginLocation.measure;
+                            var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                             var endLocation = json.locations[1].results[0];
-                            var endMeasure = endLocation.measure;
+                            var endMeasure = Math.round(endLocation.measure * 1000)/1000;
 
                             //Check to see if the measure from the first point is bigger than second measure
                             if (beginMeasure > endMeasure){
@@ -1124,9 +1124,9 @@ $(document).ready(function (){
                         }).then(function(response){
                             var json = response.data;
                             var beginLocation = json.locations[0].results[0];
-                            var beginMeasure = beginLocation.measure;
+                            var beginMeasure = Math.round(beginLocation.measure * 1000)/1000;
                             var endLocation = json.locations[1].results[0];
-                            var endMeasure = endLocation.measure;
+                            var endMeasure = Math.round(endLocation.measure * 1000)/1000;
 
                             //Check to see if the measure from the first point is bigger than second measure
                             if (beginMeasure > endMeasure){
