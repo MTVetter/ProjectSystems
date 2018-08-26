@@ -1483,8 +1483,8 @@ $(document).ready(function (){
     //Create a jQuery UI dialog box
     var dialog = $("#dialog").dialog({
         autoOpen: false,
-        height: 350,
-        width: 250,
+        height: 500,
+        width: 450,
         modal: true,
         position:{
             my: "center center",
